@@ -43,14 +43,13 @@
 	
 			<select id="select_report">
 				<option value="">-- Select Report --</option>
-				<option value="tax">Sales Tax</option>
-				<option value="pounds">Pounds of Coffee</option>
-				<option value="shipping">Shipping Costs</option>
+				<option value="dollars">Dollars</option>
+				<option value="shipping">Shipping</option>
+				<option value="pounds">Pounds</option>
 				<option value="wholesale">Wholesale</option>
-			</select>
-			
+			</select>	
 		</form>
-	<div id="updated_message"></div>
+		<hr />
 	<div id="report"></div>
 
 <script type="text/javascript">
@@ -68,8 +67,8 @@
 			.done(function(data) {
 				console.log(data);
 				$('#report').html(data);
-				$('#select_report').after("<span id='updated' style='font-size:1.4em;'>Updated</span>");
-				$('#updated').delay(1000).fadeTo(2000, 0.01);
+				$('#select_report').after("<span id='updated' style='font-size:1.4em;'>&nbsp;&nbsp;Report Updated</span>");
+				$('#updated').delay(1000).fadeTo(2000, 0.00);
 			});
 		});
 		$('.date_picker').datepicker({numberOfMonths:[1,2]});
