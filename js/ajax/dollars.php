@@ -127,8 +127,10 @@ date_default_timezone_set('America/Los_Angeles');
 			$in_state_total = number_format($in_state_total, 2,'.', ',');
 			$out_state_total = number_format($out_state_total, 2,'.', ',');
 			
+			
 			$in_state_refunds = number_format($in_state_refunds, 2,'.', ',');
 			$out_state_refunds = number_format($out_state_refunds, 2,'.', ',');
+			$total_refunds = number_format($total_refunds, 2,'.', ',');
 			
 			$in_state_tax = number_format($in_state_tax, 2,'.', ',');
 			$out_state_tax = number_format($out_state_tax, 2,'.', ',');	
@@ -224,9 +226,9 @@ date_default_timezone_set('America/Los_Angeles');
                               else {
                                   $message .= "<tr>";
                               }
-                              $message .= "<td><h2 align=\"center\">";
+                              $message .= "<td><h4 align=\"center\">";
                               $message .= "#" . $_order->id;
-                              $message .= "</h2><div style=\"text-align:center;\" class=\"row-actions\"><span><a href=\"" . get_option("siteurl") . "/wp-admin/post.php?post={$_order->id}&action=edit\">View Order</a></span></div></td>";
+                              $message .= "</h4><div style=\"text-align:center;\" class=\"row-actions\"><span><a href=\"" . get_option("siteurl") . "/wp-admin/post.php?post={$_order->id}&action=edit\" target=\"_blank\">View Order</a></span></div></td>";
 
                               $message .= "<td>";
                               $message .= "<h4>" . $_order->order_date . "</h4>";
@@ -274,7 +276,7 @@ date_default_timezone_set('America/Los_Angeles');
 								$row+=1;
 
 							}
-
+								$total_item_tax = number_format($total_item_tax, 2, '.', ',');
 								$message .= "</tr>";
 								$message .= "<tr>";
 								$message .= "<td>";

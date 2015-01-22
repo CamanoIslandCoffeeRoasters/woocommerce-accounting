@@ -68,7 +68,7 @@
 				console.log(data);
 				$('#report').html(data);
 				$('#select_report').after("<span id='updated' style='font-size:1.4em;'>&nbsp;&nbsp;Report Updated</span>");
-				$('#updated').delay(1000).fadeTo(2000, 0.00);
+				$('#updated').delay(2000).fadeTo(3000, 0.00);
 			});
 		});
 		$('.date_picker').datepicker({numberOfMonths:[1,2]});
