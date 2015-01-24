@@ -27,12 +27,13 @@
 	
 	//$date_array[] = $startTime->format("Y-m-d");
 	
-	while ($startTime < $endTime) {
+	//while ($startTime < $endTime) {
 		
-		$startTime->add(new DateInterval('P1D'));
-		$date_array[] = $startTime->format("Y-m-d");	
-	}
+		//$startTime->add(new DateInterval('P1D'));
+		//$date_array[] = $startTime->format("Y-m-d");	
+	//}
 
+	$affiliates = get_option('accounting_affiliates'); 
 
 ?>
 		<hr />
@@ -47,15 +48,27 @@
 				<option value="shipping">Shipping</option>
 				<option value="pounds">Pounds</option>
 				<option value="wholesale">Wholesale</option>
-			</select>	
+				<option value="affiliates">Affiliates</option>
+			</select>
+			<select name="choose_affiliate" style="display:none;" id="choose_affiliate">
+				<option value="">-- Choose Affiliate --</option>
+				<?php foreach ($affiliates as $key => $affiliate ) : ?> 
+					<option value="<?php echo $affiliate; ?>"><?php echo $affiliate; ?></option>
+					<?php endforeach; ?>
+			</select>
 		</form>
 		<hr />
 	<div id="report"></div>
 
 <script type="text/javascript">
 	jQuery(document).ready(function($) {
-		$('#select_report, .date_picker').live('change', function() {
+		$('#select_report, .date_picker, #choose_affiliate').live('change', function() {
 			report = $('#select_report').val();
+			if (report == "affiliates") {
+				$('#choose_affiliate').show();
+			}else{
+				$('#choose_affiliate').hide();
+			}
 			baseUrl = '<?php echo plugins_url('woocommerce-accounting/js/ajax/') ?>';
 			safeUrl = baseUrl+report+'.php';
 			$.ajax({
@@ -67,9 +80,10 @@
 			.done(function(data) {
 				console.log(data);
 				$('#report').html(data);
-				$('#select_report').after("<span id='updated' style='font-size:1.4em;'>&nbsp;&nbsp;Report Updated</span>");
+				$('#choose_affiliate').after("<span id='updated' style='font-size:1.4em;'>&nbsp;&nbsp;Report Updated</span>");
 				$('#updated').delay(2000).fadeTo(3000, 0.00);
 			});
+		
 		});
 		$('.date_picker').datepicker({numberOfMonths:[1,2]});
 	});

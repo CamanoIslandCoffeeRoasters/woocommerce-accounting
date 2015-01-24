@@ -20,6 +20,15 @@
 	add_action( 'wp_enqueue_scripts','woocommerce_accounting_css_and_js');
 
 
+	//call register settings function
+	add_action( 'admin_init', 'register_woo_accounting_settings' );
+	
+	
+	function register_woo_accounting_settings() {
+		//register our settings
+		register_setting( 'woocommerce_accounting_group', 'accounting_affiliates' );
+	}
+
 	function Woocommerce_Accounting() {
 		add_menu_page('Accounting', 'Accounting', 'manage_options', 'accounting_dashboard', 'accounting_dashboard_callback', '', $position);
 		add_submenu_page('accounting_dashboard', 'Accounting Options', 'Options', 'manage_options', 'accounting_options', 'accounting_options_callback');
