@@ -39,8 +39,7 @@
 	
 	function accounting_dashboard_callback() {
 		global $wpdb;
-
-		
+          
 		include WOOCOMMERCE_ACCOUNTING_PATH . '/admin/dashboard.php';
 	}
 	

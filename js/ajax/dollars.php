@@ -43,8 +43,16 @@ date_default_timezone_set('America/Los_Angeles');
 			$taxable_orders = get_posts($args);
 							
 			// Select all orders
-			$total_sales_orders = $wpdb->get_col("SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_paid_date' AND meta_value BETWEEN '$dateFromSQL' AND '$dateToSQL' ORDER BY post_id DESC",0);
-						 
+               $total_sales_orders = $wpdb->get_col("SELECT meta.post_id 
+                                                         FROM {$wpdb->posts} posts
+                                                         LEFT JOIN {$wpdb->postmeta} meta 
+                                                              ON posts.ID = meta.post_id
+                                                         WHERE posts.post_status = 'wc-completed' 
+                                                         AND meta.meta_key = '_paid_date' 
+                                                         AND meta.meta_value 
+                                                         BETWEEN '$dateFromSQL' 
+                                                             AND '$dateToSQL' 
+                                                             ORDER BY meta.post_id DESC",0);
 
 
 			foreach ($total_sales_orders as $k => $v) {

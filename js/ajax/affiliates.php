@@ -23,7 +23,6 @@
 											    )", 0);
 		
 		if ($affiliate_orders) {
-				$message .= "<hr />";
 				$message .= "<h1>$affiliate</h1>";
 				$message .= "<table class=\"widefat fixed\">";
 				$message .= "<thead>";
@@ -43,12 +42,6 @@
 				$message .= "<th>";
 				$message .= "Order Total";                        
 				$message .= "</th>";
-				$message .= "<th>";
-				$message .= "Order Items";                        
-				$message .= "</th>";
-				$message .= "<th>";
-				$message .= "";                        
-				$message .= "</th>";
 				$message .= "</tr>";                        
 				$message .= "</thead>";
 				$message .= "<tbody>";
@@ -58,7 +51,7 @@
 
 							$total_item_tax = $total_order_cost = 0;
 							foreach ($affiliate_orders as $key => $order){
-									$_order = new WC_Order($order);
+								$_order = new WC_Order($order);
 								
 								$total_order_cost += $_order->order_total;
 								
@@ -86,49 +79,26 @@
 
                               $message .= "<td>";
                               $message .= "<h4>$" . $_order->order_total . "</h4>";
-                              $message .= "</td>";
-
-                              $message .= "<td colspan=\"2\">";
-							  $message .= "<table>";
-                              $message .= "<tbody>";
-                              
-                              
+                              $message .= "</td>";                              
                               
                               $orderContent = $_order->get_items($type = 'line_item');
                               foreach ($orderContent as $k => $v ) {
-                                  $message .= "<tr>";
-                                  $message .= "<td>";
                                   
                                   if ($v['line_tax'] > 0) {
                                   	
-                                      $message .= $v['qty'] ." - " . $v['name'] . " - $" . $v['line_total'] . " + tax: $" . number_format(round($v['line_tax'], 2, PHP_ROUND_HALF_UP), 2,'.', ',');
-                                  }
-                                  else {
-                                  $message .= $v['qty'] ." - " . $v['name'] . " - $" . $v['line_total'];
-                                  }
-                                  $message .= "</td>";
-                                  $message .= "</tr>";
-								  
-								  $total_item_tax += number_format(round($v['line_tax'], 2, PHP_ROUND_HALF_UP), 2,'.', ',');
-                               
+                                      $total_item_tax += number_format(round($v['line_tax'], 2, PHP_ROUND_HALF_UP), 2,'.', ',');
+                                  }                              
                               }
-
-								$message .= "</tbody>";
-								$message .= "</table>";
-								$row+=1;
+							$row+=1;
 
 							}
-								$total_item_tax = number_format($total_item_tax, 2, '.', ',');
-								$message .= "</tr>";
+
 								$message .= "<tfoot>";
 								$message .= "<tr>";
 								$message .= "<td>";
+								$total_item_tax = number_format($total_item_tax, 2, '.', ',');
 								$message .= "<h1>Total: $$total_order_cost</h1>";
-								$message .= "</td>";
-								$message .= "</tr>";
-								$message .= "<tr>";
-								$message .= "<td>";
-								$message .= "<h1>Total tax: $$total_item_tax</h1>";
+								//$message .= "<h1>Total tax: $$total_item_tax</h1>";
 								$message .= "</td>";
 								$message .= "</tr>";
 								$message .= "</tfoot>";
