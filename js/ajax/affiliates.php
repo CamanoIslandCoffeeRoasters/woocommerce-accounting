@@ -22,7 +22,7 @@
 												WHERE source = '$affiliate'
 											    )", 0);
 		
-		if ($affiliate_orders) {
+		if ($affiliate_orders && $affiliate) {
 				$message .= "<h1>$affiliate</h1>";
 				$message .= "<table class=\"widefat fixed\">";
 				$message .= "<thead>";
@@ -105,8 +105,11 @@
 								$message .= "</tbody>";
 								$message .= "</table>";
                             }else {
-                            	if ($affiliate) 
-                            	echo "No Orders for $affiliate";
+                            	if ($affiliate) {
+                            	   echo "No Orders for $affiliate";
+                                }else {
+                                   echo "No Affiliate Selected";
+                            }
                             }
 
 			echo $message;

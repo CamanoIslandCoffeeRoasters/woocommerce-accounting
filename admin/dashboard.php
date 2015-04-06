@@ -41,6 +41,7 @@
 						<option value="<?php echo $affiliate; ?>"><?php echo $affiliate; ?></option>
 						<?php endforeach; ?>
 				</select>
+				<span id="submit_report" class="button-primary">Submit</span>
 					<span style="float:right;margin-right:15%;" id="print_report" class="button-primary">Print</span>
 			</form>
 		</div>
@@ -50,13 +51,15 @@
 
 <script type="text/javascript">
 	jQuery(document).ready(function($) {
-		$('#select_report, .date_picker, #choose_affiliate').live('change', function() {
-			report = $('#select_report').val();
-			if (report == "affiliates") {
-				$('#choose_affiliate').show();
-			}else{
-				$('#choose_affiliate').hide();
-			}
+		    $('#select_report, #choose_affiliate').live('change', function() {
+    			report = $('#select_report').val();
+    			if (report == "affiliates") {
+    				$('#choose_affiliate').show();
+    			}else{
+    				$('#choose_affiliate').hide();
+    			}
+			});
+		    $('#submit_report').live("click", function() {
 			baseUrl = '<?php echo plugins_url('woocommerce-accounting/js/ajax/') ?>';
 			safeUrl = baseUrl+report+'.php';
 			$.ajax({
@@ -68,7 +71,7 @@
 			.done(function(data) {
 				$('#report').html(data);
 				$('#updated').remove();
-				$('#choose_affiliate').after("<span id='updated' style='font-size:1.4em;'>&nbsp;&nbsp;Report Updated</span>");
+				$('#submit_report').after("<span id='updated' style='font-size:1.4em;'>&nbsp;&nbsp;Report Updated</span>");
 				$('#updated').delay(2000).fadeTo(2000, 0);
 			});
 		});
