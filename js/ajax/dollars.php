@@ -9,10 +9,9 @@ date_default_timezone_set('America/Los_Angeles');
 	$dateFrom = date('Y-m-d', strtotime($_POST['dateFrom']));
 	$dateTo = date('Y-m-d', strtotime($_POST['dateTo']));
 			
-			
-			$dateFromSQL = date("Y-m-d", strtotime($dateFrom) - 60 * 60 * 24);
-			$dateFromSQL = $dateFromSQL . " 20:45:01";
-			$dateToSQL = $dateTo . " 20:45:00";
+	$dateFromSQL = date("Y-m-d", strtotime($dateFrom) - 60 * 60 * 24);
+	$dateFromSQL = $dateFromSQL . " 20:45:01";
+	$dateToSQL = $dateTo . " 20:45:00";
             
 			$row = $in_state_total = $out_state_total = 0;
 			
@@ -47,12 +46,13 @@ date_default_timezone_set('America/Los_Angeles');
                                                          FROM {$wpdb->posts} posts
                                                          LEFT JOIN {$wpdb->postmeta} meta 
                                                               ON posts.ID = meta.post_id
-                                                         WHERE posts.post_status = 'wc-completed' 
+                                                         WHERE posts.post_type = 'shop_order'
+                                                         AND posts.post_status = 'wc-completed'
                                                          AND meta.meta_key = '_paid_date' 
                                                          AND meta.meta_value 
-                                                         BETWEEN '$dateFromSQL' 
-                                                             AND '$dateToSQL' 
-                                                             ORDER BY meta.post_id DESC",0);
+                                                             BETWEEN '$dateFromSQL' 
+                                                                 AND '$dateToSQL' 
+                                                         ORDER BY meta.post_id DESC",0);
 
 
 			foreach ($total_sales_orders as $k => $v) {
@@ -80,9 +80,9 @@ date_default_timezone_set('America/Los_Angeles');
 													ON posts.ID = items.order_id
 												LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta 
 													ON items.order_item_id = itemmeta.order_item_id
-												WHERE DATE(posts.post_date) 
-													BETWEEN '$dateFrom' 
-														AND '$dateTo'
+												WHERE posts.post_date
+													BETWEEN '$dateFromSQL' 
+														AND '$dateToSQL'
 												AND posts.post_status = 'wc-completed'
 												AND ((meta.meta_key = '_shipping_state') AND (meta.meta_value = 'WA'))
 												AND items.order_item_type = 'tax'
@@ -96,9 +96,9 @@ date_default_timezone_set('America/Los_Angeles');
 													ON posts.ID = items.order_id
 												LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta 
 													ON items.order_item_id = itemmeta.order_item_id
-												WHERE DATE(posts.post_date) 
-													BETWEEN '$dateFrom' 
-														AND '$dateTo'
+												WHERE posts.post_date
+                                                    BETWEEN '$dateFromSQL' 
+                                                        AND '$dateToSQL'
 												AND posts.post_status = 'wc-completed'
 												AND ((meta.meta_key = '_shipping_state') AND (meta.meta_value != 'WA'))
 												AND items.order_item_type = 'tax'
@@ -109,7 +109,9 @@ date_default_timezone_set('America/Los_Angeles');
 			// Select all orders
 			$refunded_orders = $wpdb->get_col("SELECT DISTINCT(ID) FROM {$wpdb->posts} posts
 												LEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id 
-												WHERE DATE(posts.post_modified) BETWEEN '$dateFrom' AND '$dateTo' 
+												WHERE posts.post_modified
+                                                    BETWEEN '$dateFromSQL' 
+                                                        AND '$dateToSQL' 
 												AND posts.post_status = 'wc-refunded'
 												AND ((meta.meta_key = '_order_total') AND (meta.meta_value > 0))",0);
 						 

@@ -7,15 +7,19 @@
 	$dateFrom = date('Y-m-d', strtotime($_POST['dateFrom']));
 	$dateTo = date('Y-m-d', strtotime($_POST['dateTo']));
 	
+    $dateFromSQL = date("Y-m-d", strtotime($dateFrom) - 60 * 60 * 24);
+    $dateFromSQL = $dateFromSQL . " 20:45:01";
+    $dateToSQL = $dateTo . " 20:45:00";
+    
 	$total_pounds =  $wpdb->get_var("SELECT SUM(LEFT(meta.meta_value,1)) 
 									FROM {$wpdb->posts} posts
 									LEFT JOIN {$wpdb->prefix}woocommerce_order_items items 
 										ON posts.ID = items.order_id
 									LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta meta 
 										ON items.order_item_id = meta.order_item_id
-									WHERE DATE(posts.post_date) 
-										BETWEEN '$dateFrom' 
-											AND '$dateTo' 
+									WHERE posts.post_date
+                                        BETWEEN '$dateFromSQL' 
+                                            AND '$dateToSQL' 
 									AND posts.post_status IN ('wc-completed', 'wc-refunded') 
 									AND meta.meta_key = 'pa_pack'
 								");
@@ -23,9 +27,9 @@
 	$free_pounds =  $wpdb->get_var("SELECT COUNT(items.order_id) 
 									FROM {$wpdb->posts} posts
 									LEFT JOIN {$wpdb->prefix}woocommerce_order_items items ON posts.ID = items.order_id
-									WHERE DATE(posts.post_date) 
-										BETWEEN '$dateFrom' 
-											AND '$dateTo' 
+									WHERE posts.post_date
+                                        BETWEEN '$dateFromSQL' 
+                                            AND '$dateToSQL' 
 									AND posts.post_status IN ('wc-completed', 'wc-refunded')
 									AND items.order_item_name LIKE '%Free Pound%'
 								");
@@ -38,9 +42,9 @@
 														ON posts.ID = items.order_id
 													LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta 
 														ON items.order_item_id = itemmeta.order_item_id
-													WHERE DATE(posts.post_date) 
-														BETWEEN '$dateFrom' 
-															AND '$dateTo'
+													WHERE posts.post_date
+                                                        BETWEEN '$dateFromSQL' 
+                                                            AND '$dateToSQL'
 													AND posts.post_status IN ('wc-completed', 'wc-refunded')
 													AND ((meta.meta_key = '_shipping_state') AND (meta.meta_value = 'WA'))
 													AND itemmeta.meta_key = 'pa_pack'"
@@ -53,9 +57,9 @@
 														ON posts.ID = items.order_id
 													LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta 
 														ON items.order_item_id = itemmeta.order_item_id
-													WHERE DATE(posts.post_date) 
-													BETWEEN '$dateFrom' 
-															AND '$dateTo'
+													WHERE posts.post_date
+                                                        BETWEEN '$dateFromSQL' 
+                                                            AND '$dateToSQL'
 													AND posts.post_status IN ('wc-completed', 'wc-refunded')
 													AND ((meta.meta_key = '_shipping_state') AND (meta.meta_value != 'WA'))
 													AND itemmeta.meta_key = 'pa_pack'"
@@ -67,9 +71,9 @@
 														ON ((posts.ID = meta.post_id) AND (meta.meta_key = '_shipping_state') AND (meta.meta_value = 'WA'))
 													LEFT JOIN {$wpdb->prefix}woocommerce_order_items items 
 														ON posts.ID = items.order_id
-													WHERE DATE(posts.post_date) 
-														BETWEEN '$dateFrom' 
-															AND '$dateTo' 
+													WHERE posts.post_date
+                                                        BETWEEN '$dateFromSQL' 
+                                                            AND '$dateToSQL'
 													AND posts.post_status IN ('wc-completed', 'wc-refunded')
 													AND items.order_item_name LIKE '%Free Pound%'"
 								);
@@ -80,9 +84,9 @@
 														ON ((posts.ID = meta.post_id) AND (meta.meta_key = '_shipping_state') AND (meta.meta_value != 'WA'))
 													LEFT JOIN {$wpdb->prefix}woocommerce_order_items items 
 														ON posts.ID = items.order_id
-													WHERE DATE(posts.post_date) 
-														BETWEEN '$dateFrom' 
-															AND '$dateTo' 
+													WHERE posts.post_date
+                                                        BETWEEN '$dateFromSQL' 
+                                                            AND '$dateToSQL'
 													AND posts.post_status IN ('wc-completed', 'wc-refunded')
 													AND items.order_item_name LIKE '%Free Pound%'"
 								);

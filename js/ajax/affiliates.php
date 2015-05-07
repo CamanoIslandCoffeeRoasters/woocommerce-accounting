@@ -7,15 +7,19 @@
 	$dateFrom = date("Y-m-d", strtotime($_POST['dateFrom']));
 	$dateTo = date("Y-m-d", strtotime($_POST['dateTo']));
 	
+    $dateFromSQL = date("Y-m-d", strtotime($dateFrom) - 60 * 60 * 24);
+    $dateFromSQL = $dateFromSQL . " 20:45:01";
+    $dateToSQL = $dateTo . " 20:45:00";
+    
 	$affiliate = $_POST['choose_affiliate'];
 	
 	$affiliate_orders = $wpdb->get_col("SELECT posts.ID 
 											FROM {$wpdb->prefix}posts posts
 											JOIN {$wpdb->prefix}postmeta meta ON posts.ID = meta.post_id
 											WHERE meta.meta_key = 'subscription_id' 
-											AND DATE(posts.post_date) 
-												BETWEEN '$dateFrom' 
-													AND '$dateTo'
+											AND posts.post_date
+                                                BETWEEN '$dateFromSQL' 
+                                                    AND '$dateToSQL'
 											AND meta.meta_value IN 
 												(SELECT subscription_id 
 											     FROM {$wpdb->prefix}subscriptions 
@@ -74,11 +78,11 @@
                               $message .= "</td>";
                               
                               $message .= "<td>";
-                              $message .= "<h4>" . $_order->shipping_state . "</h4>";
+                              $message .= "<h4>" . strtoupper($_order->shipping_state) . "</h4>";
                               $message .= "</td>";
 
                               $message .= "<td>";
-                              $message .= "<h4>$" . $_order->order_total . "</h4>";
+                              $message .= "<h4>$" . number_format($_order->order_total, 2, '.', ',') . "</h4>";
                               $message .= "</td>";                              
                               
                               $orderContent = $_order->get_items($type = 'line_item');
