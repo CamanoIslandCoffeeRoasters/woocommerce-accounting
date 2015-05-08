@@ -60,6 +60,7 @@
     			}
 			});
 		    $('#submit_report').live("click", function() {
+		    $(this).text("Loading . . . ").attr("disabled", true);
 			baseUrl = '<?php echo plugins_url('woocommerce-accounting/js/ajax/') ?>';
 			safeUrl = baseUrl+report+'.php';
 			$.ajax({
@@ -73,6 +74,7 @@
 				$('#updated').remove();
 				$('#submit_report').after("<span id='updated' style='font-size:1.4em;'>&nbsp;&nbsp;Report Updated</span>");
 				$('#updated').delay(2000).fadeTo(2000, 0);
+				$('#submit_report').text("Submit").attr("disabled", false);
 			});
 		});
 		$('.date_picker').datepicker({numberOfMonths:[1,2]});
