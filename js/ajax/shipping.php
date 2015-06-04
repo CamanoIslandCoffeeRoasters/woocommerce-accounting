@@ -7,15 +7,19 @@
 	$dateFrom = date('Y-m-d', strtotime($_POST['dateFrom']));
 	$dateTo = date('Y-m-d', strtotime($_POST['dateTo']));
 	
+    $dateFromSQL = date("Y-m-d", strtotime($dateFrom) - 60 * 60 * 24);
+    $dateFromSQL = $dateFromSQL . " 20:45:01";
+    $dateToSQL = $dateTo . " 20:45:00";
+    
 	$total_shipping = $wpdb->get_var("SELECT SUM(meta.meta_value) 
 										FROM {$wpdb->posts} posts
 										LEFT JOIN {$wpdb->prefix}woocommerce_order_items items 
 											ON posts.ID = items.order_id
 										LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta meta 
 											ON items.order_item_id = meta.order_item_id
-										WHERE DATE(posts.post_date) 
-											BETWEEN '$dateFrom' 
-												AND '$dateTo' 
+										WHERE posts.post_date
+                                            BETWEEN '$dateFromSQL' 
+                                                AND '$dateToSQL' 
 										AND posts.post_status = 'wc-completed'
 										AND items.order_item_type = 'shipping'
 										AND meta.meta_key = 'cost'
@@ -30,9 +34,9 @@
 													ON posts.ID = items.order_id
 												LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta 
 													ON items.order_item_id = itemmeta.order_item_id
-												WHERE DATE(posts.post_date) 
-													BETWEEN '$dateFrom' 
-														AND '$dateTo'
+												WHERE posts.post_date
+                                                    BETWEEN '$dateFromSQL' 
+                                                        AND '$dateToSQL'
 												AND posts.post_status = 'wc-completed'
 												AND ((meta.meta_key = '_shipping_state') AND (meta.meta_value = 'WA'))
 												AND items.order_item_type = 'shipping'
@@ -46,9 +50,9 @@
 													ON posts.ID = items.order_id
 												LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta 
 													ON items.order_item_id = itemmeta.order_item_id
-												WHERE DATE(posts.post_date) 
-													BETWEEN '$dateFrom' 
-														AND '$dateTo'
+												WHERE posts.post_date
+                                                    BETWEEN '$dateFromSQL' 
+                                                        AND '$dateToSQL'
 												AND posts.post_status = 'wc-completed'
 												AND ((meta.meta_key = '_shipping_state') AND (meta.meta_value != 'WA'))
 												AND items.order_item_type = 'shipping'

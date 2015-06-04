@@ -1,53 +1,55 @@
 <?php
-	
-	require( $_SERVER['DOCUMENT_ROOT'] . '/wp-load.php');
+    
+    require( $_SERVER['DOCUMENT_ROOT'] . '/wp-load.php');
 
-	global $wpdb;
-	
-	$dateFrom = date("Y-m-d", strtotime($_POST['dateFrom']));
-	$dateTo = date("Y-m-d", strtotime($_POST['dateTo']));
-	
-	$affiliate = $_POST['choose_affiliate'];
-	
-	$affiliate_orders = $wpdb->get_col("SELECT posts.ID 
-											FROM {$wpdb->prefix}posts posts
-											JOIN {$wpdb->prefix}postmeta meta ON posts.ID = meta.post_id
-											WHERE meta.meta_key = 'subscription_id'
-											AND posts.post_status = 'wc-completed' 
-											AND DATE(posts.post_date) 
-												BETWEEN '$dateFrom' 
-													AND '$dateTo'
-											AND meta.meta_value IN 
-												(SELECT subscription_id 
-											     FROM {$wpdb->prefix}subscriptions 
-												WHERE source = '$affiliate'
-											    )", 0);
-		
-		if ($affiliate_orders && $affiliate) {
-				$message .= "<h1>$affiliate</h1>";
-				$message .= "<table class=\"widefat fixed\">";
-				$message .= "<thead>";
-				$message .= "<tr>";
-				$message .= "<th>";
-				$message .= "Order #";                        
-				$message .= "</th>";                        
-				$message .= "<th>";
-				$message .= "Date";                        
-				$message .= "</th>";                        
-				$message .= "<th>";
-				$message .= "Customer";                        
-				$message .= "</th>";                                    
-				$message .= "<th>";
-				$message .= "State";                        
-				$message .= "</th>";
-				$message .= "<th>";
-				$message .= "Order Total";                        
-				$message .= "</th>";
-				$message .= "</tr>";                        
-				$message .= "</thead>";
-				$message .= "<tbody>";
-
-
+    global $wpdb;
+    
+    $dateFrom = date("Y-m-d", strtotime($_POST['dateFrom']));
+    $dateTo = date("Y-m-d", strtotime($_POST['dateTo']));
+    
+    $dateFromSQL = date("Y-m-d", strtotime($dateFrom) - 60 * 60 * 24);
+    $dateFromSQL = $dateFromSQL . " 20:45:01";
+    $dateToSQL = $dateTo . " 20:45:00";
+    
+    $affiliate = $_POST['choose_affiliate'];
+    
+    $affiliate_orders = $wpdb->get_col("SELECT posts.ID 
+                                            FROM {$wpdb->prefix}posts posts
+                                            JOIN {$wpdb->prefix}postmeta meta ON posts.ID = meta.post_id
+                                            WHERE meta.meta_key = 'subscription_id'
+                                            AND posts.post_status = 'wc-completed' 
+                                            AND DATE(posts.post_date) 
+                                                BETWEEN '$dateFrom' 
+                                                    AND '$dateTo'
+                                            AND meta.meta_value IN 
+                                                (SELECT subscription_id 
+                                                 FROM {$wpdb->prefix}subscriptions 
+                                                 WHERE source = '$affiliate'
+                                                )", 0);
+        
+        if ($affiliate_orders && $affiliate) {
+                $message .= "<h1>$affiliate</h1>";
+                $message .= "<table class=\"widefat fixed\">";
+                $message .= "<thead>";
+                $message .= "<tr>";
+                $message .= "<th>";
+                $message .= "Order #";                        
+                $message .= "</th>";                        
+                $message .= "<th>";
+                $message .= "Date";                        
+                $message .= "</th>";                        
+                $message .= "<th>";
+                $message .= "Customer";                        
+                $message .= "</th>";                                    
+                $message .= "<th>";
+                $message .= "State";                        
+                $message .= "</th>";
+                $message .= "<th>";
+                $message .= "Order Total";                        
+                $message .= "</th>";
+                $message .= "</tr>";                        
+                $message .= "</thead>";
+                $message .= "<tbody>";
 
 
 						$total_item_tax = $total_order_cost = $total_orders = 0;
@@ -58,7 +60,7 @@
                                 $total_orders++;
                             
 							  $total_order_cost += $_order->order_total;
-								
+
                               $message .= ($row % 2 == 0) ? "<tr valign=\"center\" class=\"alternate\">" : "<tr>";
                               
                               $message .= "<td><p align=\"center\">";
@@ -85,11 +87,11 @@
                               foreach ($orderContent as $k => $v ) {
                                   
                                   if ($v['line_tax'] > 0) {
-                                  	
+                                    
                                       $total_item_tax += number_format(round($v['line_tax'], 2, PHP_ROUND_HALF_UP), 2,'.', ',');
                                   }                              
                               }
-							$row+=1;
+                            $row+=1;
 
 							}
                           }
@@ -153,16 +155,15 @@
 								$message .= "</tbody>";
 								$message .= "</table>";
 
+
                             }else {
-                            	if ($affiliate) {
-                            	   echo "No Orders for $affiliate";
+                                if ($affiliate) {
+                                   echo "No Orders for $affiliate";
                                 }else {
                                    echo "No Affiliate Selected";
                             }
                             }
 
-
 			echo $message;
-	 
 	 
 ?>

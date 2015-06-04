@@ -9,10 +9,9 @@ date_default_timezone_set('America/Los_Angeles');
 	$dateFrom = date('Y-m-d', strtotime($_POST['dateFrom']));
 	$dateTo = date('Y-m-d', strtotime($_POST['dateTo']));
 			
-			
-			$dateFromSQL = date("Y-m-d", strtotime($dateFrom) - 60 * 60 * 24);
-			$dateFromSQL = $dateFromSQL . " 20:45:01";
-			$dateToSQL = $dateTo . " 20:45:00";
+	$dateFromSQL = date("Y-m-d", strtotime($dateFrom) - 60 * 60 * 24);
+	$dateFromSQL = $dateFromSQL . " 20:45:01";
+	$dateToSQL = $dateTo . " 20:45:00";
             
 			$row = $in_state_total = $out_state_total = 0;
 			
@@ -47,14 +46,15 @@ date_default_timezone_set('America/Los_Angeles');
                                                          FROM {$wpdb->posts} posts
                                                          LEFT JOIN {$wpdb->postmeta} meta 
                                                               ON posts.ID = meta.post_id
-                                                         WHERE posts.post_status = 'wc-completed' 
+                                                         WHERE posts.post_type = 'shop_order'
+                                                         AND posts.post_status = 'wc-completed'
                                                          AND meta.meta_key = '_paid_date' 
                                                          AND meta.meta_value 
-                                                         BETWEEN '$dateFromSQL' 
-                                                             AND '$dateToSQL' 
-                                                             ORDER BY meta.post_id DESC",0);
+                                                             BETWEEN '$dateFromSQL' 
+                                                                 AND '$dateToSQL' 
+                                                         ORDER BY meta.post_id DESC",0);
 
-
+            
 			foreach ($total_sales_orders as $k => $v) {
 			
 			  $_order->get_order($v);
@@ -136,7 +136,7 @@ date_default_timezone_set('America/Los_Angeles');
 
 			$in_state_total = number_format($in_state_total, 2,'.', ',');
 			$out_state_total = number_format($out_state_total, 2,'.', ',');
-			
+			$total_dollars = number_format($total_dollars, 2,'.',',');
 			
 			$in_state_refunds = number_format($in_state_refunds, 2,'.', ',');
 			$out_state_refunds = number_format($out_state_refunds, 2,'.', ',');
@@ -158,7 +158,7 @@ date_default_timezone_set('America/Los_Angeles');
 				<table class="widefat fixed">
 					<thead>
 						<tr>
-							<th></th>
+							<th><b><?php echo count($total_sales_orders) . " Orders";?></b></th>
 						<?php foreach ($columns as $column) : ?>
 							<th class="column"> <?php echo $column ?> </th>
 						<?php endforeach; ?>
@@ -182,16 +182,8 @@ date_default_timezone_set('America/Los_Angeles');
 					</tbody>
 				</table>
 			</div>
-		<?php endif; ?>
 			
-			
-			
-			
-			
-			
-			
-			
-		<?php				
+		<?php endif;
 			
 			if ($taxable_orders) {
 				$message .= "<hr />";
@@ -257,8 +249,8 @@ date_default_timezone_set('America/Los_Angeles');
                               $message .= "</td>";
 
                               $message .= "<td colspan=\"2\">";
-								$message .= "<table>";
-                              	$message .= "<tbody>";
+							  $message .= "<table>";
+                              $message .= "<tbody>";
                               
                               
                               
@@ -269,11 +261,12 @@ date_default_timezone_set('America/Los_Angeles');
                                   
                                   if ($v['line_tax'] > 0) {
                                   	
-                                      $message .= $v['qty'] ." - " . $v['name'] . " - $" . $v['line_total'] . " + tax: $" . number_format(round($v['line_tax'], 2, PHP_ROUND_HALF_UP), 2,'.', ',');
+                                    $message .= $v['qty'] ." - " . $v['name'] . " - $" . $v['line_total'] . " + tax: $" . number_format(round($v['line_tax'], 2, PHP_ROUND_HALF_UP), 2,'.', ',');
                                   }
                                   else {
-                                  $message .= $v['qty'] ." - " . $v['name'] . " - $" . $v['line_total'];
+                                    $message .= $v['qty'] ." - " . $v['name'] . " - $" . $v['line_total'];
                                   }
+                                  
                                   $message .= "</td>";
                                   $message .= "</tr>";
 								  
