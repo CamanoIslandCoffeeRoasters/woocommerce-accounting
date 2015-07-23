@@ -30,7 +30,7 @@
 	}
 
 	function Woocommerce_Accounting() {
-		add_menu_page('Accounting', 'Accounting', 'manage_options', 'accounting_dashboard', 'accounting_dashboard_callback', '');
+		add_menu_page('Accounting', 'Accounting', 'manage_options', 'accounting_dashboard', 'accounting_dashboard_callback', 'dashicons-edit');
 		add_submenu_page('accounting_dashboard', 'Accounting Options', 'Options', 'manage_options', 'accounting_options', 'accounting_options_callback');
 	}
 	

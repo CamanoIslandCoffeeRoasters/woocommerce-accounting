@@ -32,6 +32,7 @@
 					<option value="dollars">Dollars</option>
 					<option value="shipping">Shipping</option>
 					<option value="pounds">Pounds</option>
+					<option value="orders">Orders</option>
 					<option value="wholesale">Wholesale</option>
 					<option value="affiliates">Affiliates</option>
 				</select>
