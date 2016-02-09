@@ -1,22 +1,22 @@
 <?php
 
 	require( $_SERVER['DOCUMENT_ROOT'].'/wp-load.php' );
-	
+
 global $wpdb, $woocommerce;
 
-date_default_timezone_set('America/Los_Angeles');	
+date_default_timezone_set('America/Los_Angeles');
 
 	$dateFrom = date('Y-m-d', strtotime($_POST['dateFrom']));
 	$dateTo = date('Y-m-d', strtotime($_POST['dateTo']));
-			
+
 	$dateFromSQL = date("Y-m-d", strtotime($dateFrom) - 60 * 60 * 24);
 	$dateFromSQL = $dateFromSQL . " 20:45:01";
 	$dateToSQL = $dateTo . " 20:45:00";
-            
+
 			$row = $in_state_total = $out_state_total = 0;
-			
+
 			$message = '';
-            
+
 			$_order = new WC_Order();
 
 
@@ -28,7 +28,7 @@ date_default_timezone_set('America/Los_Angeles');
 			                'relation' => 'AND',
 			                array(
 			                    'key' => '_order_tax',
-			                    'value' => '0',
+			                    'value' => '0.00',
 			                    'compare'	=> '>'
 			                ),
 			                array(
@@ -38,120 +38,120 @@ date_default_timezone_set('America/Los_Angeles');
 			                )
 			            )
 			        );
-			// Select taxable orders		
+			// Select taxable orders
 			$taxable_orders = get_posts($args);
-							
+
 			// Select all orders
-               $total_sales_orders = $wpdb->get_col("SELECT meta.post_id 
+               $total_sales_orders = $wpdb->get_col("SELECT meta.post_id
                                                          FROM {$wpdb->posts} posts
-                                                         LEFT JOIN {$wpdb->postmeta} meta 
+                                                         LEFT JOIN {$wpdb->postmeta} meta
                                                               ON posts.ID = meta.post_id
                                                          WHERE posts.post_type = 'shop_order'
                                                          AND posts.post_status = 'wc-completed'
-                                                         AND meta.meta_key = '_paid_date' 
-                                                         AND meta.meta_value 
-                                                             BETWEEN '$dateFromSQL' 
-                                                                 AND '$dateToSQL' 
+                                                         AND meta.meta_key = '_paid_date'
+                                                         AND meta.meta_value
+                                                             BETWEEN '$dateFromSQL'
+                                                                 AND '$dateToSQL'
                                                          ORDER BY meta.post_id DESC",0);
 
-            
+
 			foreach ($total_sales_orders as $k => $v) {
-			
+
 			  $_order->get_order($v);
-			  
+
 			  		// Sum totals for sales in Washington State
 				  if (strtoupper($_order->shipping_state) == "WA") {
 						$in_state_total += $_order->order_total;
-						
-				  // Sum totals for sales in states besides Washington	
+
+				  // Sum totals for sales in states besides Washington
 					} else {
 						  $out_state_total += $_order->order_total;
 					}
 				$total_dollars += $_order->order_total;
 			}
-?>			
-			
+?>
+
 		<?php
-		
-			$in_state_tax = $wpdb->get_var("SELECT SUM(itemmeta.meta_value) 
+
+			$in_state_tax = $wpdb->get_var("SELECT SUM(itemmeta.meta_value)
 												FROM {$wpdb->posts} posts
-												LEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id 
-												LEFT JOIN {$wpdb->prefix}woocommerce_order_items items 
+												LEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id
+												LEFT JOIN {$wpdb->prefix}woocommerce_order_items items
 													ON posts.ID = items.order_id
-												LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta 
+												LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta
 													ON items.order_item_id = itemmeta.order_item_id
-												WHERE posts.post_date 
-													BETWEEN '$dateFromSQL' 
+												WHERE posts.post_date
+													BETWEEN '$dateFromSQL'
 														AND '$dateToSQL'
 												AND posts.post_status = 'wc-completed'
 												AND ((meta.meta_key = '_shipping_state') AND (meta.meta_value = 'WA'))
 												AND items.order_item_type = 'tax'
-												AND itemmeta.meta_key = 'tax_amount' 
+												AND itemmeta.meta_key = 'tax_amount'
 												AND itemmeta.meta_value > 0
 											");
-			$out_state_tax = $wpdb->get_var("SELECT SUM(itemmeta.meta_value) 
+			$out_state_tax = $wpdb->get_var("SELECT SUM(itemmeta.meta_value)
 												FROM {$wpdb->posts} posts
-												LEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id 
-												LEFT JOIN {$wpdb->prefix}woocommerce_order_items items 
+												LEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id
+												LEFT JOIN {$wpdb->prefix}woocommerce_order_items items
 													ON posts.ID = items.order_id
-												LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta 
+												LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta
 													ON items.order_item_id = itemmeta.order_item_id
-												WHERE posts.post_date 
-                                                    BETWEEN '$dateFromSQL' 
+												WHERE posts.post_date
+                                                    BETWEEN '$dateFromSQL'
                                                         AND '$dateToSQL'
 												AND posts.post_status = 'wc-completed'
 												AND ((meta.meta_key = '_shipping_state') AND (meta.meta_value != 'WA'))
 												AND items.order_item_type = 'tax'
-												AND itemmeta.meta_key = 'tax_amount' 
+												AND itemmeta.meta_key = 'tax_amount'
 												AND itemmeta.meta_value > 0
-											"); 
-		
+											");
+
 			// Select all orders
 			$refunded_orders = $wpdb->get_col("SELECT DISTINCT(ID) FROM {$wpdb->posts} posts
-												LEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id 
-												WHERE posts.post_modified 
-                                                    BETWEEN '$dateFromSQL' 
-                                                        AND '$dateToSQL' 
+												LEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id
+												WHERE posts.post_modified
+                                                    BETWEEN '$dateFromSQL'
+                                                        AND '$dateToSQL'
 												AND posts.post_status = 'wc-refunded'
 												AND ((meta.meta_key = '_order_total') AND (meta.meta_value > 0))",0);
-						 
+
 
 
 			foreach ($refunded_orders as $r => $o) {
 			$_order = new WC_Order();
 			  $_order->get_order($o);
-			  
+
 			  		// Sum totals for sales in Washington State
 				  if (strtoupper($_order->shipping_state) == "WA") {
 						$in_state_refunds += $_order->order_total;
-						
-				  // Sum totals for sales in states besides Washington	
+
+				  // Sum totals for sales in states besides Washington
 					} else {
 						  $out_state_refunds += $_order->order_total;
 					}
 				$total_refunds += $_order->order_total;
 			}
-		
-		
+
+
 
 			$in_state_total = number_format($in_state_total, 2,'.', ',');
 			$out_state_total = number_format($out_state_total, 2,'.', ',');
 			$total_dollars = number_format($total_dollars, 2,'.',',');
-			
+
 			$in_state_refunds = number_format($in_state_refunds, 2,'.', ',');
 			$out_state_refunds = number_format($out_state_refunds, 2,'.', ',');
 			$total_refunds = number_format($total_refunds, 2,'.', ',');
-			
+
 			$in_state_tax = number_format($in_state_tax, 2,'.', ',');
-			$out_state_tax = number_format($out_state_tax, 2,'.', ',');	
+			$out_state_tax = number_format($out_state_tax, 2,'.', ',');
 			$total_tax = number_format($in_state_tax + $out_state_tax, 2,'.', ',')
 		?>
-			
-		<?php $columns = array("In-State", "Out-of-State", "Total"); ?> 
+
+		<?php $columns = array("In-State", "Out-of-State", "Total"); ?>
 		<?php $rows = array("Total Dollars" =>  array($in_state_total, $out_state_total, $total_dollars),
 					  	    "Refunds" 		=>	array($in_state_refunds, $out_state_refunds, $total_refunds),
 					  	    "Sales Tax"		=> 	array($in_state_tax, $out_state_tax, $total_tax)); ?>
-		
+
 		<?php if ($total_dollars) : ?>
 			<div>
 				<h1>Dollars</h1>
@@ -166,7 +166,7 @@ date_default_timezone_set('America/Los_Angeles');
 					</thead>
 					<tbody>
 						<?php $counter = 0; foreach ($rows as $row => $values) : ?>
-							<?php if ($counter % 2 == 0 ) {  
+							<?php if ($counter % 2 == 0 ) {
                               	echo  "<tr valign=\"center\" class=\"alternate\">";
                               }
                               else {
@@ -177,14 +177,14 @@ date_default_timezone_set('America/Los_Angeles');
 							<td><?php echo $value ?></td>
 							<?php endforeach; ?>
 							</tr>
-							
+
 						<?php $counter++; endforeach; ?>
 					</tbody>
 				</table>
 			</div>
-			
+
 		<?php endif;
-			
+
 			if ($taxable_orders) {
 				$message .= "<hr />";
 				$message .= "<h1>Taxable Orders</h1>";
@@ -192,27 +192,27 @@ date_default_timezone_set('America/Los_Angeles');
 				$message .= "<thead>";
 				$message .= "<tr>";
 				$message .= "<th>";
-				$message .= "Order #";                        
-				$message .= "</th>";                        
-				$message .= "<th>";
-				$message .= "Date";                        
-				$message .= "</th>";                        
-				$message .= "<th>";
-				$message .= "Customer";                        
-				$message .= "</th>";                                    
-				$message .= "<th>";
-				$message .= "State";                        
+				$message .= "Order #";
 				$message .= "</th>";
 				$message .= "<th>";
-				$message .= "Order Total";                        
+				$message .= "Date";
 				$message .= "</th>";
 				$message .= "<th>";
-				$message .= "Order Items";                        
+				$message .= "Customer";
 				$message .= "</th>";
 				$message .= "<th>";
-				$message .= "";                        
+				$message .= "State";
 				$message .= "</th>";
-				$message .= "</tr>";                        
+				$message .= "<th>";
+				$message .= "Order Total";
+				$message .= "</th>";
+				$message .= "<th>";
+				$message .= "Order Items";
+				$message .= "</th>";
+				$message .= "<th>";
+				$message .= "";
+				$message .= "</th>";
+				$message .= "</tr>";
 				$message .= "</thead>";
 				$message .= "<tbody>";
 
@@ -222,7 +222,7 @@ date_default_timezone_set('America/Los_Angeles');
 							$total_item_tax = 0;
 							foreach ($taxable_orders as $order){
 									$_order = new WC_Order($order->ID);
-								if ($row % 2 == 0 ) {  
+								if ($row % 2 == 0 ) {
                               $message .= "<tr valign=\"center\" class=\"alternate\">";
                               }
                               else {
@@ -235,11 +235,11 @@ date_default_timezone_set('America/Los_Angeles');
                               $message .= "<td>";
                               $message .= "<h4>" . $_order->order_date . "</h4>";
                               $message .= "</td>";
-                              
+
                               $message .= "<td>";
                               $message .= "<h4>" . $_order->billing_first_name . " " . $_order->billing_last_name . "</h4>";
                               $message .= "</td>";
-                              
+
                               $message .= "<td>";
                               $message .= "<h4>" . $_order->shipping_state . "</h4>";
                               $message .= "</td>";
@@ -251,27 +251,27 @@ date_default_timezone_set('America/Los_Angeles');
                               $message .= "<td colspan=\"2\">";
 							  $message .= "<table>";
                               $message .= "<tbody>";
-                              
-                              
-                              
+
+
+
                               $orderContent = $_order->get_items($type = 'line_item');
                               foreach ($orderContent as $k => $v ) {
                                   $message .= "<tr>";
                                   $message .= "<td>";
-                                  
+
                                   if ($v['line_tax'] > 0) {
-                                  	
+
                                     $message .= $v['qty'] ." - " . $v['name'] . " - $" . $v['line_total'] . " + tax: $" . number_format(round($v['line_tax'], 2, PHP_ROUND_HALF_UP), 2,'.', ',');
                                   }
                                   else {
                                     $message .= $v['qty'] ." - " . $v['name'] . " - $" . $v['line_total'];
                                   }
-                                  
+
                                   $message .= "</td>";
                                   $message .= "</tr>";
-								  
+
 								  $total_item_tax += number_format(round($v['line_tax'], 2, PHP_ROUND_HALF_UP), 2,'.', ',');
-                               
+
                               }
 
 								$message .= "</tbody>";
@@ -290,5 +290,5 @@ date_default_timezone_set('America/Los_Angeles');
 								$message .= "</table>";
                             }
 
-			echo $message;	
+			echo $message;
 ?>

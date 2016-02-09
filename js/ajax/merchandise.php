@@ -3,29 +3,54 @@
 	require( $_SERVER['DOCUMENT_ROOT'].'/wp-load.php' );
 
     global $wpdb;
-
+    $products = $orders = array();
     $dateFrom = date("Y-m-d", strtotime($_POST['dateFrom']));
     $dateTo = date("Y-m-d", strtotime($_POST['dateTo']));
 
     $dateFromSQL = date("Y-m-d", strtotime($dateFrom) - 60 * 60 * 24);
     $dateFromSQL = $dateFromSQL . " 20:45:01";
     $dateToSQL = $dateTo . " 20:45:00";
+    $merchandise = $_POST['add_item_search'];
+
+    $products = $wpdb->get_results("SELECT items.order_item_name as item, sum(meta.meta_value) as qty
+                                    FROM $wpdb->posts posts
+                                    JOIN {$wpdb->prefix}woocommerce_order_items items ON posts.ID = items.order_id
+                                    JOIN {$wpdb->prefix}woocommerce_order_itemmeta meta
+                                    	ON ((items.order_item_id = meta.order_item_id)
+                                    	AND (meta.meta_key = '_qty'))
+                                    WHERE posts.post_status = 'wc-completed'
+                                    AND posts.post_type = 'shop_order'
+                                    AND REPLACE(order_item_name, '- ', '') LIKE '%$merchandise%'
+                                    AND DATE(posts.post_date)
+                                    BETWEEN '$dateFromSQL'
+                                    AND '$dateToSQL'
+                                    GROUP BY items.order_item_name
+                                    ", 0);
 
     $orders = $wpdb->get_col("SELECT posts.ID
-                                            FROM $wpdb->posts posts
-                                            JOIN $wpdb->postmeta meta ON posts.ID = meta.post_id
-                                            WHERE meta.meta_key = 'subscription_type'
-                                            AND posts.post_status = 'wc-completed'
-                                            AND DATE(posts.post_date)
-                                                BETWEEN '$dateFromSQL'
-                                                    AND '$dateToSQL'
-                                            AND meta.meta_value = 'Wholesale'", 0);
+                                FROM $wpdb->posts posts
+                                JOIN {$wpdb->prefix}woocommerce_order_items items ON posts.ID = items.order_id
+                                WHERE posts.post_status = 'wc-completed'
+                                AND posts.post_type = 'shop_order'
+                                AND REPLACE(order_item_name, '- ', '') LIKE '%$merchandise%'
+                                AND DATE(posts.post_date)
+                                    BETWEEN '$dateFromSQL'
+                                    AND '$dateToSQL'
+                                GROUP BY posts.ID
+                                            ", 0);
 
-	        if ($orders) {
+	        if ($orders && $orders) {
 	            $message = $row = '';
+                $message .= "<table class='widefat fixed striped'>";
+                $message .= "<thead><tr><td>Product</td><td>Quantity</td></tr><tbody>";
+                foreach ($products as $product) {
+                    $message .= sprintf("<tr><td>%s</td><td>%s</td></tr>", $product->item, $product->qty);
+                }
+                $message .= "</tbody></table>";
+                $message .= "<br /><hr /><br />";
 
-            	$columns = array("Order #", "Date", "Customer", "State", "Weight", "Total", "Actions");
-                $message .= "<table class=\"widefat fixed striped\">";
+                $columns = array("Order #", "Date", "Customer", "State", "Total", "Tax", "Actions");
+                $message .= "<table class='widefat fixed striped'>";
                 $message .= "<thead>";
                 $message .= "<tr>";
                 foreach ($columns as $column) {
@@ -34,7 +59,6 @@
                 $message .= "</tr>";
                 $message .= "</thead>";
                 $message .= "<tbody>";
-
 
 					$total_item_tax = $total_order_cost = $total_orders = 0;
 
@@ -94,6 +118,7 @@
 					$message .= "</tbody>";
 					$message .= "</table>";
 
+                    print_r($results = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}subscriptions WHERE subscription_id < 20"));
 					echo $message;
 				}
 ?>
