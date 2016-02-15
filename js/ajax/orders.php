@@ -97,7 +97,7 @@
 				$message .= "<tr>";
 				$message .= "<td>";
                 $message .= "<h1>Total Orders: </h1>";
-                $message .= "<td>";
+                $message .= "</td>";
                 $message .= "<td>";
                 $message .= "<h1>$total_orders</h1>";
                 $message .= "<td>";
@@ -106,19 +106,19 @@
                 $message .= "<tr>";
                 $message .= "<td>";
                 $message .= "<h1>Total:</h1>";
-                $message .= "<td>";
+                $message .= "</td>";
                 $message .= "<td>";
                 $message .= "<h1>$" . $total_order_cost . "</h1>";
-                $message .= "<td>";
+                $message .= "</td>";
                 $message .= "</tr>";
 
                 $message .= "<tr>";
                 $message .= "<td>";
                 $message .= "<h1>Total Shipping:</h1>";
-                $message .= "<td>";
+                $message .= "</td>";
                 $message .= "<td>";
                 $message .= "<h1> $" . $total_shipping . "</h1>";
-                $message .= "<td>";
+                $message .= "</td>";
                 $message .= "</tr>";
 
                 $minus_shipping = ($total_order_cost - $total_shipping);
@@ -126,10 +126,10 @@
                 $message .= "<tr>";
                 $message .= "<td>";
                 $message .= "<h1>Minus Shipping:</h1>";
-                $message .= "<td>";
+                $message .= "</td>";
                 $message .= "<td>";
                 $message .= "<h1> $" . $minus_shipping . "</h1>";
-                $message .= "<td>";
+                $message .= "</td>";
                 $message .= "</tr>";
 
 				$message .= "</tfoot>";

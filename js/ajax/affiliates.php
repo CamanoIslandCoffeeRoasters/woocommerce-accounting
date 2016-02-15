@@ -50,8 +50,6 @@
 
                         $total_order_cost += $_order->order_total;
 
-                        //   $message .= ($row % 2 == 0) ? "<tr valign=\"center\" class=\"alternate\">" : "<tr>";
-
                         $message .= "<tr><td>";
                         $message .= "<a href='" . get_option('siteurl') . "/wp-admin/post.php?action=edit&post=$_order->id' target='_blank'>$_order->id</a>";
                         $message .= "</td>";
