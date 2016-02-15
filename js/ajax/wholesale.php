@@ -24,8 +24,8 @@
 	        if ($orders) {
 	            $message = $row = '';
 
-            	$columns = array("Order #", "Date", "Customer", "State", "Weight", "Total", "Actions");
-                $message .= "<table class=\"widefat fixed striped\">";
+            	$columns = array("Order", "Date", "Customer", "State", "Weight", "Total", "Actions");
+                $message .= "<table class='widefat fixed striped exportable'>";
                 $message .= "<thead>";
                 $message .= "<tr>";
                 foreach ($columns as $column) {
@@ -54,10 +54,10 @@
 
 						$total_order_cost += $_order->order_total;
 
-						$message .= "<tr id='row-$_order->id' valign=\"center\">";
+						$message .= "<tr id='row-{$_order->id}' valign='center'>";
 
 						$message .= "<td>";
-						$message .= "<a href='" . get_option('siteurl') . "/wp-admin/post.php?action=edit&post=$_order->id' target='_blank'>#$_order->id</a>";
+						$message .= "<a href='" . get_option('siteurl') . "/wp-admin/post.php?action=edit&post=$_order->id' target='_blank'>$_order->id</a>";
 						$message .= "</td>";
 
 						$message .= "<td>";

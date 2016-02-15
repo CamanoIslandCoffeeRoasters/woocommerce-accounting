@@ -23,6 +23,7 @@
 
 ?>
 		<hr />
+        <script src="<?php echo plugins_url("/woocommerce-accounting/js/jquery.json.min.js") ?>"></script>
 		<div>
 			<form id="date_form" action="" method="POST">
 
@@ -44,11 +45,12 @@
                 <input style="display:none;" type="text" name="add_item_search" id="add_item_search" size="15" class="add-item-search" placeholder="Search Products . . . " />
 				<span id="submit_report" class="button-primary">Submit</span>
 					<span style="float:right;margin-right:15%;" id="print_report" class="button-primary">Print</span>
+                    <span style="float:right;margin-right:1%;" id="export_report" class="button-primary">Export</span>
 			</form>
 		</div>
 		<br />
 		<hr />
-	<div id="report"></div>
+	       <div id="report"></div>
 
 <script type="text/javascript">
 	jQuery(document).ready(function($) {
@@ -78,9 +80,6 @@
 			})
 			.done(function(data) {
 				$('#report').html(data);
-				$('#updated').remove();
-				$('#submit_report').after("<span id='updated' style='font-size:1.4em;'>&nbsp;&nbsp;Report Updated</span>");
-				$('#updated').delay(2000).fadeTo(2000, 0);
 				$('#submit_report').text("Submit").attr("disabled", false);
 			});
 		});
@@ -104,39 +103,53 @@
 
         $('#report').on('click', '.action', function() {
             order_id = $(this).attr("id");
-            parent_row = $(this);
-            exists = $("#order_details_"+order_id);
-            $('button.actions').text("Items");
-            $('button', parent_row).text('Items');
-            $('[id^="order_details_"]').remove();
-            if (exists.length == 0) {
-                safeUrl = '<?php echo plugins_url('woocommerce-accounting/js/ajax/get-order.php') ?>';
-                $.ajax({
-                    type: 'POST',
-                    url: safeUrl,
-                    dataType: 'HTML',
-                    data: {order_id: order_id}
-                })
-                .done(function(response) {
-                    parent_row.parent().after(response);
-                });
-            }else {
-                $("#order_details_"+order_id).remove();
+            if ($(this).text() == "Cancel") {
+                $("#order_details_"+order_id).slideUp();
                 $('button', parent_row).text('Items');
+            }else {
+                parent_row = $(this);
+                exists = $("#order_details_"+order_id);
+                parent_row.parent().slideDown(1200).after("<div style='height:200px;display:none;' class='loading-order-details'></div>");
+                $('.loading-order-details').slideDown(600);
+                $('button.actions').text("Items");
+                $('button', parent_row).text('Cancel');
+                $('[id^="order_details_"]').remove();
+                if (exists.length == 0) {
+                    safeUrl = '<?php echo plugins_url('woocommerce-accounting/js/ajax/get-order.php') ?>';
+                    $.ajax({
+                        type: 'POST',
+                        url: safeUrl,
+                        dataType: 'HTML',
+                        data: {order_id: order_id}
+                    })
+                    .done(function(response) {
+                        $('.loading-order-details').remove();
+                        parent_row.parent().after(response);
+                    });
+                }else {
+                    $("#order_details_"+order_id).remove();
+                    $('button', parent_row).text('Items');
+                }
             }
+        });
+
+        $('#date_form').on('click', "#export_report", function() {
+            table_data = new Array();
+            $('#report table.exportable tr').each(function(row, tr) {
+                cell = (row == 0) ? "th" : "td";
+                columns = ($(tr).children(cell).length);
+                table_data[row] = Object();
+
+                for (i = 0; i < columns; i++) {
+                    table_data[row][i] = ($(tr).find(cell+':eq('+i+')').text()).trim();
+                }
+            });
+            // 1IMPORTANT Convert to JSON (required jQuery plugin)
+            table_data = $.toJSON(table_data);
+            // Send to Export file, which returns a downloaded CSV
+            document.location.href = "<?php echo plugins_url("/woocommerce-accounting/js/ajax/export.php") ?>?report="+report+"&table_data="+table_data;
         });
 	});
 
-</script>
 
-<?php
-// $columns = array();
-// ($results = $wpdb->get_results("SELECT subscription_id, name, email  FROM {$wpdb->prefix}subscriptions WHERE subscription_id < 20", ARRAY_N));
-// foreach ($results as $result ) {
-//     foreach ($result as $column => $value) {
-//         echo $value. ',';
-//     }
-// }
-// $columns = rtrim(implode(',', $columns), ',');
-// echo $columns;
-?>
+</script>

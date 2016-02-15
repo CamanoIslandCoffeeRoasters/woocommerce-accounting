@@ -1,117 +1,117 @@
 <?php
 
 	require( $_SERVER['DOCUMENT_ROOT'].'/wp-load.php' );
-	
+
 	global $wpdb;
-	
+
 	$dateFrom = date('Y-m-d', strtotime($_POST['dateFrom']));
 	$dateTo = date('Y-m-d', strtotime($_POST['dateTo']));
-	
+
     $dateFromSQL = date("Y-m-d", strtotime($dateFrom) - 60 * 60 * 24);
     $dateFromSQL = $dateFromSQL . " 20:45:01";
     $dateToSQL = $dateTo . " 20:45:00";
-    
-	$total_pounds =  $wpdb->get_var("SELECT SUM(LEFT(meta.meta_value,1)) 
+
+	$total_pounds =  $wpdb->get_var("SELECT SUM(LEFT(meta.meta_value,1))
 									FROM {$wpdb->posts} posts
-									LEFT JOIN {$wpdb->prefix}woocommerce_order_items items 
+									LEFT JOIN {$wpdb->prefix}woocommerce_order_items items
 										ON posts.ID = items.order_id
-									LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta meta 
+									LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta meta
 										ON items.order_item_id = meta.order_item_id
 									WHERE posts.post_date
-                                        BETWEEN '$dateFromSQL' 
-                                            AND '$dateToSQL' 
-									AND posts.post_status IN ('wc-completed', 'wc-refunded') 
+                                        BETWEEN '$dateFromSQL'
+                                            AND '$dateToSQL'
+									AND posts.post_status IN ('wc-completed', 'wc-refunded')
 									AND meta.meta_key = 'pa_pack'
 								");
-						
-	$free_pounds =  $wpdb->get_var("SELECT COUNT(items.order_id) 
+
+	$free_pounds =  $wpdb->get_var("SELECT COUNT(items.order_id)
 									FROM {$wpdb->posts} posts
 									LEFT JOIN {$wpdb->prefix}woocommerce_order_items items ON posts.ID = items.order_id
 									WHERE posts.post_date
-                                        BETWEEN '$dateFromSQL' 
-                                            AND '$dateToSQL' 
+                                        BETWEEN '$dateFromSQL'
+                                            AND '$dateToSQL'
 									AND posts.post_status IN ('wc-completed', 'wc-refunded')
 									AND items.order_item_name LIKE '%Free Pound%'
 								");
-		
-		
-		$in_state_total_pounds = $wpdb->get_var("SELECT SUM(LEFT(itemmeta.meta_value,1)) 
+
+
+		$in_state_total_pounds = $wpdb->get_var("SELECT SUM(LEFT(itemmeta.meta_value,1))
 													FROM {$wpdb->posts} posts
-													LEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id 
-													LEFT JOIN {$wpdb->prefix}woocommerce_order_items items 
+													LEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id
+													LEFT JOIN {$wpdb->prefix}woocommerce_order_items items
 														ON posts.ID = items.order_id
-													LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta 
+													LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta
 														ON items.order_item_id = itemmeta.order_item_id
 													WHERE posts.post_date
-                                                        BETWEEN '$dateFromSQL' 
+                                                        BETWEEN '$dateFromSQL'
                                                             AND '$dateToSQL'
 													AND posts.post_status IN ('wc-completed', 'wc-refunded')
 													AND ((meta.meta_key = '_shipping_state') AND (meta.meta_value = 'WA'))
 													AND itemmeta.meta_key = 'pa_pack'"
 								);
-		
-		$out_state_total_pounds = $wpdb->get_var("SELECT SUM(LEFT(itemmeta.meta_value,1)) 
+
+		$out_state_total_pounds = $wpdb->get_var("SELECT SUM(LEFT(itemmeta.meta_value,1))
 													FROM {$wpdb->posts} posts
-													LEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id 
-													LEFT JOIN {$wpdb->prefix}woocommerce_order_items items 
+													LEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id
+													LEFT JOIN {$wpdb->prefix}woocommerce_order_items items
 														ON posts.ID = items.order_id
-													LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta 
+													LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta
 														ON items.order_item_id = itemmeta.order_item_id
 													WHERE posts.post_date
-                                                        BETWEEN '$dateFromSQL' 
+                                                        BETWEEN '$dateFromSQL'
                                                             AND '$dateToSQL'
 													AND posts.post_status IN ('wc-completed', 'wc-refunded')
 													AND ((meta.meta_key = '_shipping_state') AND (meta.meta_value != 'WA'))
 													AND itemmeta.meta_key = 'pa_pack'"
 								);
-		
-        $in_state_free_pounds = $wpdb->get_var("SELECT COUNT(items.order_id) 
+
+        $in_state_free_pounds = $wpdb->get_var("SELECT COUNT(items.order_id)
                                                     FROM {$wpdb->posts} posts
-                                                    LEFT JOIN {$wpdb->postmeta} meta 
+                                                    LEFT JOIN {$wpdb->postmeta} meta
                                                         ON ((posts.ID = meta.post_id) AND (meta.meta_key = '_shipping_state'))
-                                                    LEFT JOIN {$wpdb->prefix}woocommerce_order_items items 
+                                                    LEFT JOIN {$wpdb->prefix}woocommerce_order_items items
                                                         ON posts.ID = items.order_id
-                                                    WHERE DATE(posts.post_date) 
-                                                        BETWEEN '$dateFrom' 
+                                                    WHERE DATE(posts.post_date)
+                                                        BETWEEN '$dateFrom'
                                                             AND '$dateTo'
-                                                    AND meta.meta_value = 'WA' 
-                                                    AND posts.post_status IN ('wc-completed', 'wc-refunded')
-                                                    AND items.order_item_name LIKE '%Free Pound%'"
-                                );
-                                    
-        $out_state_free_pounds = $wpdb->get_var("SELECT COUNT(items.order_id) 
-                                                    FROM {$wpdb->posts} posts
-                                                    LEFT JOIN {$wpdb->postmeta} meta 
-                                                        ON ((posts.ID = meta.post_id) AND (meta.meta_key = '_shipping_state'))
-                                                    LEFT JOIN {$wpdb->prefix}woocommerce_order_items items 
-                                                        ON posts.ID = items.order_id
-                                                    WHERE DATE(posts.post_date) 
-                                                        BETWEEN '$dateFrom' 
-                                                            AND '$dateTo'
-                                                    AND meta.meta_value != 'WA' 
+                                                    AND meta.meta_value = 'WA'
                                                     AND posts.post_status IN ('wc-completed', 'wc-refunded')
                                                     AND items.order_item_name LIKE '%Free Pound%'"
                                 );
 
-		
+        $out_state_free_pounds = $wpdb->get_var("SELECT COUNT(items.order_id)
+                                                    FROM {$wpdb->posts} posts
+                                                    LEFT JOIN {$wpdb->postmeta} meta
+                                                        ON ((posts.ID = meta.post_id) AND (meta.meta_key = '_shipping_state'))
+                                                    LEFT JOIN {$wpdb->prefix}woocommerce_order_items items
+                                                        ON posts.ID = items.order_id
+                                                    WHERE DATE(posts.post_date)
+                                                        BETWEEN '$dateFrom'
+                                                            AND '$dateTo'
+                                                    AND meta.meta_value != 'WA'
+                                                    AND posts.post_status IN ('wc-completed', 'wc-refunded')
+                                                    AND items.order_item_name LIKE '%Free Pound%'"
+                                );
+
+
 		$in_state_total_pounds = number_format($in_state_total_pounds, 2,'.', ',');
 		$out_state_total_pounds = number_format($out_state_total_pounds, 2,'.', ',');
 		$total_pounds = number_format($total_pounds, 2,'.', ',');
-		
+
 		$in_state_free_pounds = number_format($in_state_free_pounds, 2,'.', ',');
 		$out_state_free_pounds = number_format($out_state_free_pounds, 2,'.', ',');
 		$free_pounds = number_format($free_pounds, 2,'.', ',');
-		
+
 		$columns = array("In-State", "Out-of-State", "Total");
 		$rows = array("Total Pounds" =>  array($in_state_total_pounds, $out_state_total_pounds, $total_pounds),
 					  "Free Pounds" =>   array($in_state_free_pounds,  $out_state_free_pounds,  $free_pounds )
 					  );
 		?>
-		
+
 		<?php if ($total_pounds) : ?>
 		<div>
 			<h1>Pounds</h1>
-			<table class="widefat fixed">
+			<table class="widefat fixed exportable">
 				<thead>
 					<tr>
 						<th></th>
@@ -128,9 +128,8 @@
 						<td><?php echo $value ?></td>
 						<?php endforeach; ?>
 						</tr>
-					<?php endforeach; ?> 
+					<?php endforeach; ?>
 				</tbody>
 			</table>
 		</div>
 	<?php endif; ?>
-		

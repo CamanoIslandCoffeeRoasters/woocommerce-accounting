@@ -9,7 +9,7 @@
 	*/
 	define( 'WOOCOMMERCE_ACCOUNTING_URL', __FILE__);
 	define( 'WOOCOMMERCE_ACCOUNTING_PATH', untrailingslashit(plugin_dir_path(__FILE__)));
-	include WOOCOMMERCE_ACCOUNTING_PATH ."/classes/Export.class.php";
+
 	function woocommerce_accounting_css_and_js() {
 		wp_register_style('woocommerce_accounting_css', plugins_url('css/admin.css',__FILE__ ));
 		wp_enqueue_style('woocommerce_accounting_css');

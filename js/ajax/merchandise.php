@@ -41,16 +41,16 @@
 
 	        if ($orders && $orders) {
 	            $message = $row = '';
-                $message .= "<table class='widefat fixed striped'>";
-                $message .= "<thead><tr><td>Product</td><td>Quantity</td></tr><tbody>";
+                $message .= "<table class='widefat fixed striped exportable'>";
+                $message .= "<thead><tr><th>Product</th><th>Quantity</th></tr><tbody>";
                 foreach ($products as $product) {
                     $message .= sprintf("<tr><td>%s</td><td>%s</td></tr>", $product->item, $product->qty);
                 }
                 $message .= "</tbody></table>";
                 $message .= "<br /><hr /><br />";
 
-                $columns = array("Order #", "Date", "Customer", "State", "Total", "Tax", "Actions");
-                $message .= "<table class='widefat fixed striped'>";
+                $columns = array("Order", "Date", "Customer", "State", "Total", "Tax", "Actions");
+                $message .= "<table id='table' class='widefat fixed striped'>";
                 $message .= "<thead>";
                 $message .= "<tr>";
                 foreach ($columns as $column) {
@@ -81,7 +81,7 @@
 						$message .= "<tr id='row-$_order->id' valign=\"center\">";
 
 						$message .= "<td>";
-						$message .= "<a href='" . get_option('siteurl') . "/wp-admin/post.php?action=edit&post=$_order->id' target='_blank'>#$_order->id</a>";
+						$message .= "<a href='" . get_option('siteurl') . "/wp-admin/post.php?action=edit&post=$_order->id' target='_blank'>$_order->id</a>";
 						$message .= "</td>";
 
 						$message .= "<td>";
@@ -97,12 +97,12 @@
 						$message .= "</td>";
 
 						$message .= "<td>";
-						$message .= array_sum($weight) . ' lbs';
+						$total = ($_order->order_total != "0.00" && $_order->order_total != '') ? number_format($_order->order_total, 2, '.', ',') : '0.00';
+						$message .= "$". $total;
 						$message .= "</td>";
 
 						$message .= "<td>";
-						$message .= "$" . number_format($_order->order_total, 2, '.', ',');
-						if ($_order->order_tax > 0) $message .= " + tax: $" . number_format($_order->order_tax, 2, '.', ',');
+						$message .= ($_order->order_tax > 0) ? number_format($_order->order_tax, 2, '.', ',') : "";
 						$message .= "</td>";
 
 						$message .= "<td class='action' id='$_order->id'>";
@@ -118,7 +118,6 @@
 					$message .= "</tbody>";
 					$message .= "</table>";
 
-                    print_r($results = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}subscriptions WHERE subscription_id < 20"));
 					echo $message;
 				}
 ?>

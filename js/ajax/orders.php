@@ -23,8 +23,8 @@
 
         if ($orders) {
             $message = $row = '';
-            $columns = array("Order #", "Date", "Customer", "State", "Total", "Tax", "Actions");
-                $message .= "<table class=\"widefat fixed striped\">";
+            $columns = array("Order", "Date", "Customer", "State", "Total", "Tax", "Actions");
+                $message .= "<table class='widefat fixed striped exportable'>";
                 $message .= "<thead>";
                 $message .= "<tr>";
                 foreach ($columns as $column) {
@@ -42,7 +42,7 @@
                     $subscription_type = get_post_meta($order_id, 'subscription_type', true);
                     // For some unknown reason, the continue will stop wholesale orders. My best guess is that "continue" means, skip over this iteration, and start a new one
                     if ($subscription_type == "Wholesale") continue;
-                    echo $order_id;
+
 					$_order = new WC_Order($order_id);
 
                     if ( number_format($_order->order_total, 2, '.', ',') > 8.00) {
@@ -50,7 +50,7 @@
 
                         $total_order_cost += $_order->order_total;
                         $message .= "<tr><td>";
-                        $message .= "<a href='" . get_option('siteurl') . "/wp-admin/post.php?action=edit&post=$_order->id' target='_blank'>#$_order->id</a>";
+                        $message .= "<a href='" . get_option('siteurl') . "/wp-admin/post.php?action=edit&post=$_order->id' target='_blank'>$_order->id</a>";
                         $message .= "</td>";
 
                         $message .= "<td>";

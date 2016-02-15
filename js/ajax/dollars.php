@@ -13,7 +13,7 @@ date_default_timezone_set('America/Los_Angeles');
 	$dateFromSQL = $dateFromSQL . " 20:45:01";
 	$dateToSQL = $dateTo . " 20:45:00";
 
-			$row = $in_state_total = $out_state_total = 0;
+			$total_dollars = $row = $in_state_total = $out_state_total = $in_state_refunds = $out_state_refunds = $total_refunds = 0;
 
 			$message = '';
 
@@ -155,7 +155,7 @@ date_default_timezone_set('America/Los_Angeles');
 		<?php if ($total_dollars) : ?>
 			<div>
 				<h1>Dollars</h1>
-				<table class="widefat fixed">
+				<table class="widefat fixed exportable">
 					<thead>
 						<tr>
 							<th><b><?php echo count($total_sales_orders) . " Orders";?></b></th>
