@@ -50,7 +50,12 @@
 		</div>
 		<br />
 		<hr />
-	       <div id="report"></div>
+        <div id="report"></div>
+
+        <form id="export_form" action="<?php echo plugins_url("/woocommerce-accounting/js/ajax/export.php") ?>" method="POST">
+            <input type="hidden" name="table_data" value="" />
+            <input type="hidden" name="report" value="wholesale" />
+        </form>
 
 <script type="text/javascript">
 	jQuery(document).ready(function($) {
@@ -146,8 +151,11 @@
             });
             // 1IMPORTANT Convert to JSON (required jQuery plugin)
             table_data = $.toJSON(table_data);
+            $('#export_form input[name="table_data"]').val(table_data);
+            $('#export_form input[name="report"]').val(report);
+            $('#export_form').submit();
             // Send to Export file, which returns a downloaded CSV
-            document.location.href = "<?php echo plugins_url("/woocommerce-accounting/js/ajax/export.php") ?>?report="+report+"&table_data="+table_data;
+            // document.location.href = "<?php echo plugins_url("/woocommerce-accounting/js/ajax/export.php") ?>?report="+report+"&table_data="+table_data;
         });
 	});
 

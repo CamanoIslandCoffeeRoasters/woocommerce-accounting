@@ -1,11 +1,11 @@
 <?php
     require $_SERVER['DOCUMENT_ROOT'] . '/wp-load.php';
 
-    $table_data = $_GET['table_data'];
+    $table_data = $_POST['table_data'];
     $table_data = stripcslashes($table_data);
     $table_data = json_decode($table_data, TRUE);
     $results = $table_data;
-    $report = $_GET['report'];
+    $report = $_POST['report'];
     $date = date('mdY Hi');
 
     $columns = array();
