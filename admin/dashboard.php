@@ -161,6 +161,4 @@
             // document.location.href = "<?php echo plugins_url("/woocommerce-accounting/js/ajax/export.php") ?>?report="+report+"&table_data="+table_data;
         });
 	});
-
-
 </script>
