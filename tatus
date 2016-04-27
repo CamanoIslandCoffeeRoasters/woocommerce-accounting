@@ -1,951 +1,0 @@
-[1mdiff --git a/admin/dashboard.php b/admin/dashboard.php[m
-[1mindex c1fd3e2..8320bca 100644[m
-[1m--- a/admin/dashboard.php[m
-[1m+++ b/admin/dashboard.php[m
-[36m@@ -23,6 +23,7 @@[m
- [m
- ?>[m
- 		<hr />[m
-[32m+[m[32m        <script src="<?php echo plugins_url("/woocommerce-accounting/js/jquery.json.min.js") ?>"></script>[m[41m[m
- 		<div>[m
- 			<form id="date_form" action="" method="POST">[m
- [m
-[36m@@ -44,11 +45,12 @@[m
-                 <input style="display:none;" type="text" name="add_item_search" id="add_item_search" size="15" class="add-item-search" placeholder="Search Products . . . " />[m
- 				<span id="submit_report" class="button-primary">Submit</span>[m
- 					<span style="float:right;margin-right:15%;" id="print_report" class="button-primary">Print</span>[m
-[32m+[m[32m                    <span style="float:right;margin-right:1%;" id="export_report" class="button-primary">Export</span>[m[41m[m
- 			</form>[m
- 		</div>[m
- 		<br />[m
- 		<hr />[m
-[31m-	<div id="report"></div>[m
-[32m+[m	[32m       <div id="report"></div>[m[41m[m
- [m
- <script type="text/javascript">[m
- 	jQuery(document).ready(function($) {[m
-[36m@@ -78,9 +80,6 @@[m
- 			})[m
- 			.done(function(data) {[m
- 				$('#report').html(data);[m
-[31m-				$('#updated').remove();[m
-[31m-				$('#submit_report').after("<span id='updated' style='font-size:1.4em;'>&nbsp;&nbsp;Report Updated</span>");[m
-[31m-				$('#updated').delay(2000).fadeTo(2000, 0);[m
- 				$('#submit_report').text("Submit").attr("disabled", false);[m
- 			});[m
- 		});[m
-[36m@@ -104,39 +103,53 @@[m
- [m
-         $('#report').on('click', '.action', function() {[m
-             order_id = $(this).attr("id");[m
-[31m-            parent_row = $(this);[m
-[31m-            exists = $("#order_details_"+order_id);[m
-[31m-            $('button.actions').text("Items");[m
-[31m-            $('button', parent_row).text('Items');[m
-[31m-            $('[id^="order_details_"]').remove();[m
-[31m-            if (exists.length == 0) {[m
-[31m-                safeUrl = '<?php echo plugins_url('woocommerce-accounting/js/ajax/get-order.php') ?>';[m
-[31m-                $.ajax({[m
-[31m-                    type: 'POST',[m
-[31m-                    url: safeUrl,[m
-[31m-                    dataType: 'HTML',[m
-[31m-                    data: {order_id: order_id}[m
-[31m-                })[m
-[31m-                .done(function(response) {[m
-[31m-                    parent_row.parent().after(response);[m
-[31m-                });[m
-[31m-            }else {[m
-[31m-                $("#order_details_"+order_id).remove();[m
-[32m+[m[32m            if ($(this).text() == "Cancel") {[m[41m[m
-[32m+[m[32m                $("#order_details_"+order_id).slideUp();[m[41m[m
-                 $('button', parent_row).text('Items');[m
-[32m+[m[32m            }else {[m[41m[m
-[32m+[m[32m                parent_row = $(this);[m[41m[m
-[32m+[m[32m                exists = $("#order_details_"+order_id);[m[41m[m
-[32m+[m[32m                parent_row.parent().slideDown(1200).after("<div style='height:200px;display:none;' class='loading-order-details'></div>");[m[41m[m
-[32m+[m[32m                $('.loading-order-details').slideDown(600);[m[41m[m
-[32m+[m[32m                $('button.actions').text("Items");[m[41m[m
-[32m+[m[32m                $('button', parent_row).text('Cancel');[m[41m[m
-[32m+[m[32m                $('[id^="order_details_"]').remove();[m[41m[m
-[32m+[m[32m                if (exists.length == 0) {[m[41m[m
-[32m+[m[32m                    safeUrl = '<?php echo plugins_url('woocommerce-accounting/js/ajax/get-order.php') ?>';[m[41m[m
-[32m+[m[32m                    $.ajax({[m[41m[m
-[32m+[m[32m                        type: 'POST',[m[41m[m
-[32m+[m[32m                        url: safeUrl,[m[41m[m
-[32m+[m[32m                        dataType: 'HTML',[m[41m[m
-[32m+[m[32m                        data: {order_id: order_id}[m[41m[m
-[32m+[m[32m                    })[m[41m[m
-[32m+[m[32m                    .done(function(response) {[m[41m[m
-[32m+[m[32m                        $('.loading-order-details').remove();[m[41m[m
-[32m+[m[32m                        parent_row.parent().after(response);[m[41m[m
-[32m+[m[32m                    });[m[41m[m
-[32m+[m[32m                }else {[m[41m[m
-[32m+[m[32m                    $("#order_details_"+order_id).remove();[m[41m[m
-[32m+[m[32m                    $('button', parent_row).text('Items');[m[41m[m
-[32m+[m[32m                }[m[41m[m
-             }[m
-         });[m
-[32m+[m[41m[m
-[32m+[m[32m        $('#date_form').on('click', "#export_report", function() {[m[41m[m
-[32m+[m[32m            table_data = new Array();[m[41m[m
-[32m+[m[32m            $('#report table.exportable tr').each(function(row, tr) {[m[41m[m
-[32m+[m[32m                cell = (row == 0) ? "th" : "td";[m[41m[m
-[32m+[m[32m                columns = ($(tr).children(cell).length);[m[41m[m
-[32m+[m[32m                table_data[row] = Object();[m[41m[m
-[32m+[m[41m[m
-[32m+[m[32m                for (i = 0; i < columns; i++) {[m[41m[m
-[32m+[m[32m                    table_data[row][i] = ($(tr).find(cell+':eq('+i+')').text()).trim();[m[41m[m
-[32m+[m[32m                }[m[41m[m
-[32m+[m[32m            });[m[41m[m
-[32m+[m[32m            // 1IMPORTANT Convert to JSON (required jQuery plugin)[m[41m[m
-[32m+[m[32m            table_data = $.toJSON(table_data);[m[41m[m
-[32m+[m[32m            // Send to Export file, which returns a downloaded CSV[m[41m[m
-[32m+[m[32m            document.location.href = "<?php echo plugins_url("/woocommerce-accounting/js/ajax/export.php") ?>?report="+report+"&table_data="+table_data;[m[41m[m
-[32m+[m[32m        });[m[41m[m
- 	});[m
- [m
-[31m-</script>[m
- [m
-[31m-<?php[m
-[31m-// $columns = array();[m
-[31m-// ($results = $wpdb->get_results("SELECT subscription_id, name, email  FROM {$wpdb->prefix}subscriptions WHERE subscription_id < 20", ARRAY_N));[m
-[31m-// foreach ($results as $result ) {[m
-[31m-//     foreach ($result as $column => $value) {[m
-[31m-//         echo $value. ',';[m
-[31m-//     }[m
-[31m-// }[m
-[31m-// $columns = rtrim(implode(',', $columns), ',');[m
-[31m-// echo $columns;[m
-[31m-?>[m
-[32m+[m[32m</script>[m[41m[m
-[1mdiff --git a/classes/Export.class.php b/classes/Export.class.php[m
-[1mdeleted file mode 100644[m
-[1mindex 05b7ff3..0000000[m
-[1m--- a/classes/Export.class.php[m
-[1m+++ /dev/null[m
-[36m@@ -1,107 +0,0 @@[m
-[31m-<?php[m
-[31m-[m
-[31m-class CSVExport[m
-[31m-{[m
-[31m-	/**[m
-[31m-	 * Constructor[m
-[31m-	 */[m
-[31m-	public function __construct()[m
-[31m-	{[m
-[31m-		if(isset($_GET['download_report']))[m
-[31m-		{[m
-[31m-			$csv = $this->generate_csv();[m
-[31m-[m
-[31m-			header("Pragma: public");[m
-[31m-			header("Expires: 0");[m
-[31m-			header("Cache-Control: must-revalidate, post-check=0, pre-check=0");[m
-[31m-			header("Cache-Control: private", false);[m
-[31m-			header("Content-Type: application/octet-stream");[m
-[31m-			header("Content-Disposition: attachment; filename=\"report.csv\";" );[m
-[31m-			header("Content-Transfer-Encoding: binary");[m
-[31m-[m
-[31m-			echo $csv;[m
-[31m-			exit;[m
-[31m-		}[m
-[31m-[m
-[31m-		// Add extra menu items for admins[m
-[31m-		add_action('admin_menu', array($this, 'admin_menu'));[m
-[31m-[m
-[31m-		// Create end-points[m
-[31m-		add_filter('query_vars', array($this, 'query_vars'));[m
-[31m-		add_action('parse_request', array($this, 'parse_request'));[m
-[31m-	}[m
-[31m-[m
-[31m-	/**[m
-[31m-	 * Add extra menu items for admins[m
-[31m-	 */[m
-[31m-	public function admin_menu()[m
-[31m-	{[m
-[31m-		add_menu_page('Download Report', 'Download Report', 'manage_options', 'download_report', array($this, 'download_report'));[m
-[31m-	}[m
-[31m-[m
-[31m-	/**[m
-[31m-	 * Allow for custom query variables[m
-[31m-	 */[m
-[31m-	public function query_vars($query_vars)[m
-[31m-	{[m
-[31m-		$query_vars[] = 'download_report';[m
-[31m-		return $query_vars;[m
-[31m-	}[m
-[31m-[m
-[31m-	/**[m
-[31m-	 * Parse the request[m
-[31m-	 */[m
-[31m-	public function parse_request(&$wp)[m
-[31m-	{[m
-[31m-		if(array_key_exists('download_report', $wp->query_vars))[m
-[31m-		{[m
-[31m-			$this->download_report();[m
-[31m-			exit;[m
-[31m-		}[m
-[31m-	}[m
-[31m-[m
-[31m-	/**[m
-[31m-	 * Download report[m
-[31m-	 */[m
-[31m-	public function download_report()[m
-[31m-	{[m
-[31m-		echo '<div class="wrap">';[m
-[31m-		echo '<div id="icon-tools" class="icon32"></div>';[m
-[31m-		echo '<h2>Download Report</h2>';[m
-[31m-		//$url = site_url();[m
-[31m-[m
-[31m-		echo '<p><a href="site_url()/wp-admin/admin.php?page=download_report&download_report">Export the Subscribers</a>';[m
-[31m-	}[m
-[31m-[m
-[31m-	/**[m
-[31m-	 * Converting data to CSV[m
-[31m-	 */[m
-[31m-	public function generate_csv()[m
-[31m-	{[m
-[31m-        global $wpdb;[m
-[31m-		$csv_output = '';[m
-[31m-        $results = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}subscriptions WHERE subscription_id < 20");[m
-[31m-        // Column Headers[m
-[31m-        foreach ($results[0] as $column => $result ) {[m
-[31m-            $columns[] = $column;[m
-[31m-        }[m
-[31m-        $csv_output = rtrim(implode(',', $columns), ',');[m
-[31m-        $csv_output .= "\n";[m
-[31m-        // Cell Values[m
-[31m-        foreach ($results as $result ) {[m
-[31m-            foreach ($result as $column => $value) {[m
-[31m-                if (strpos($value, ',')) {[m
-[31m-                    $csv_output .= '"' . $value . '",';[m
-[31m-                }else {[m
-[31m-                    $csv_output .= $value . ',';[m
-[31m-                }[m
-[31m-            }[m
-[31m-            $csv_output .= "\n";[m
-[31m-        }[m
-[31m-[m
-[31m-		return $csv_output;[m
-[31m-	}[m
-[31m-}[m
-[31m-[m
-[31m-// Instantiate a singleton of this plugin[m
-[31m-$csvExport = new CSVExport();[m
-[1mdiff --git a/js/ajax/affiliates.php b/js/ajax/affiliates.php[m
-[1mindex 691cd7a..a905042 100644[m
-[1m--- a/js/ajax/affiliates.php[m
-[1m+++ b/js/ajax/affiliates.php[m
-[36m@@ -10,7 +10,7 @@[m
-     $dateFromSQL = date("Y-m-d", strtotime($dateFrom) - 60 * 60 * 24);[m
-     $dateFromSQL = $dateFromSQL . " 20:45:01";[m
-     $dateToSQL = $dateTo . " 20:45:00";[m
-[31m-[m
-[32m+[m[32m    $message = '';[m[41m[m
-     $affiliate = $_POST['choose_affiliate'];[m
- [m
-     $affiliate_orders = $wpdb->get_col("SELECT posts.ID[m
-[36m@@ -29,140 +29,134 @@[m
- [m
-         if ($affiliate_orders && $affiliate) {[m
-                 $message .= "<h1>$affiliate</h1>";[m
-[31m-                $message .= "<table class=\"widefat fixed\">";[m
-[32m+[m[32m                $columns = array("Order", "Date", "Customer", "State", "Total", "Tax", "Actions");[m[41m[m
-[32m+[m[32m                $message .= "<table id='table' class='widefat fixed striped exportable'>";[m[41m[m
-                 $message .= "<thead>";[m
-                 $message .= "<tr>";[m
-[31m-                $message .= "<th>";[m
-[31m-                $message .= "Order #";[m
-[31m-                $message .= "</th>";[m
-[31m-                $message .= "<th>";[m
-[31m-                $message .= "Date";[m
-[31m-                $message .= "</th>";[m
-[31m-                $message .= "<th>";[m
-[31m-                $message .= "Customer";[m
-[31m-                $message .= "</th>";[m
-[31m-                $message .= "<th>";[m
-[31m-                $message .= "State";[m
-[31m-                $message .= "</th>";[m
-[31m-                $message .= "<th>";[m
-[31m-                $message .= "Order Total";[m
-[31m-                $message .= "</th>";[m
-[32m+[m[32m                foreach ($columns as $column) {[m[41m[m
-[32m+[m[32m                    $message .= "<th>$column</th>";[m[41m[m
-[32m+[m[32m                }[m[41m[m
-                 $message .= "</tr>";[m
-                 $message .= "</thead>";[m
-                 $message .= "<tbody>";[m
- [m
- [m
-[31m-						$total_item_tax = $total_order_cost = $total_orders = 0;[m
-[31m-						foreach ($affiliate_orders as $key => $order){[m
-[31m-							$_order = new WC_Order($order);[m
-[32m+[m[32m                $total_item_tax = $total_order_cost = $total_orders = 0;[m[41m[m
-[32m+[m[32m                foreach ($affiliate_orders as $key => $order) {[m[41m[m
-[32m+[m[32m                    $_order = new WC_Order($order);[m[41m[m
- [m
-[31m-                            if ( number_format($_order->order_total, 2, '.', ',') > 8.00) {[m
-[31m-                                $total_orders++;[m
-[32m+[m[32m                    if ( number_format($_order->order_total, 2, '.', ',') > 8.00) {[m[41m[m
-[32m+[m[32m                        $total_orders++;[m[41m[m
- [m
-[31m-							  $total_order_cost += $_order->order_total;[m
-[32m+[m[32m                        $total_order_cost += $_order->order_total;[m[41m[m
- [m
-[31m-                              $message .= ($row % 2 == 0) ? "<tr valign=\"center\" class=\"alternate\">" : "<tr>";[m
-[32m+[m[32m                        //   $message .= ($row % 2 == 0) ? "<tr valign=\"center\" class=\"alternate\">" : "<tr>";[m[41m[m
- [m
-[31m-                              $message .= "<td><p align=\"center\">";[m
-[31m-                              $message .= "#" . $_order->id;[m
-[31m-                              $message .= "</p><div style=\"text-align:center;\" class=\"row-actions\"><span><a href=\"" . get_option("siteurl") . "/wp-admin/post.php?post={$_order->id}&action=edit\" target=\"_blank\">View Order</a></span></div></td>";[m
-[32m+[m[32m                        $message .= "<tr><td>";[m[41m[m
-[32m+[m[32m                        $message .= "<a href='" . get_option('siteurl') . "/wp-admin/post.php?action=edit&post=$_order->id' target='_blank'>$_order->id</a>";[m[41m[m
-[32m+[m[32m                        $message .= "</td>";[m[41m[m
- [m
-[31m-                              $message .= "<td>";[m
-[31m-                              $message .= "<p>" . $_order->order_date . "</p>";[m
-[31m-                              $message .= "</td>";[m
-[32m+[m[32m                        $message .= "<td>";[m[41m[m
-[32m+[m[32m                        $message .= "<p>" . $_order->order_date . "</p>";[m[41m[m
-[32m+[m[32m                        $message .= "</td>";[m[41m[m
- [m
-[31m-                              $message .= "<td>";[m
-[31m-                              $message .= "<p>" . $_order->billing_first_name . " " . $_order->billing_last_name . "</p>";[m
-[31m-                              $message .= "</td>";[m
-[32m+[m[32m                        $message .= "<td>";[m[41m[m
-[32m+[m[32m                        $message .= "<p>" . $_order->billing_first_name . " " . $_order->billing_last_name . "</p>";[m[41m[m
-[32m+[m[32m                        $message .= "</td>";[m[41m[m
- [m
-[31m-                              $message .= "<td>";[m
-[31m-                              $message .= "<p>" . strtoupper($_order->shipping_state) . "</p>";[m
-[31m-                              $message .= "</td>";[m
-[32m+[m[32m                        $message .= "<td>";[m[41m[m
-[32m+[m[32m                        $message .= "<p>" . strtoupper($_order->shipping_state) . "</p>";[m[41m[m
-[32m+[m[32m                        $message .= "</td>";[m[41m[m
- [m
-[31m-                              $message .= "<td>";[m
-[31m-                              $message .= "<p>$" . number_format($_order->order_total, 2, '.', ',') . "</p>";[m
-[31m-                              $message .= "</td>";[m
-[32m+[m[32m                        $message .= "<td>";[m[41m[m
-[32m+[m[32m                        $message .= "<p>$" . number_format($_order->order_total, 2, '.', ',') . "</p>";[m[41m[m
-[32m+[m[32m                        $message .= "</td>";[m[41m[m
- [m
-[31m-                              $orderContent = $_order->get_items($type = 'line_item');[m
-[31m-                              foreach ($orderContent as $k => $v ) {[m
-[32m+[m[32m                        $message .= "<td>";[m[41m[m
-[32m+[m						[32mif ($_order->order_tax > 0) $message .= "$" . number_format($_order->order_tax, 2, '.', ',');[m[41m[m
-[32m+[m						[32m$message .= "</td>";[m[41m[m
- [m
-[31m-                                  if ($v['line_tax'] > 0) {[m
-[32m+[m[32m                        $message .= "<td class='action' id='$_order->id'>";[m[41m[m
-[32m+[m						[32m$message .= "<button class='actions button-primary'>Items</button>";[m[41m[m
-[32m+[m						[32m$message .= "</td>";[m[41m[m
- [m
-[31m-                                      $total_item_tax += number_format(round($v['line_tax'], 2, PHP_ROUND_HALF_UP), 2,'.', ',');[m
-[31m-                                  }[m
-[31m-                              }[m
-[31m-                            $row+=1;[m
-[32m+[m[32m                        $orderContent = $_order->get_items($type = 'line_item');[m[41m[m
-[32m+[m[32m                        foreach ($orderContent as $k => $v ) {[m[41m[m
-[32m+[m[32m                            if ($v['line_tax'] > 0) {[m[41m[m
-[32m+[m[32m                                $total_item_tax += number_format(round($v['line_tax'], 2, PHP_ROUND_HALF_UP), 2,'.', ',');[m[41m[m
-[32m+[m[32m                            }[m[41m[m
-[32m+[m[32m                        }[m[41m[m
- [m
-[31m-							}[m
-[31m-                          }[m
-[31m-[m
-[31m-                                $total_shipping = number_format($total_orders * 8.00, 2, '.', ',');[m
-[31m-[m
-[31m-                                $message .= "</tr>";[m
-[31m-								$message .= "<tfoot>";[m
-[31m-[m
-[31m-								$message .= "<tr>";[m
-[31m-								$message .= "<td>";[m
-[31m-                                $message .= "<h1>Total Orders: </h1>";[m
-[31m-                                $message .= "</td>";[m
-[31m-                                $message .= "<td>";[m
-[31m-                                $message .= "<h1>$total_orders</h1>";[m
-[31m-                                $message .= "</td>";[m
-[31m-                                $message .= "</tr>";[m
-[31m-[m
-[31m-                                $message .= "<tr>";[m
-[31m-                                $message .= "<td>";[m
-[31m-                                $message .= "<h1>Total:</h1>";[m
-[31m-                                $message .= "</td>";[m
-[31m-                                $message .= "<td>";[m
-[31m-                                $message .= "<h1>$" . $total_order_cost . "</h1>";[m
-[31m-                                $message .= "</td>";[m
-[31m-                                $message .= "</tr>";[m
-[31m-[m
-[31m-                                $message .= "<tr>";[m
-[31m-                                $message .= "<td>";[m
-[31m-                                $message .= "<h1>Total Shipping:</h1>";[m
-[31m-                                $message .= "</td>";[m
-[31m-                                $message .= "<td>";[m
-[31m-                                $message .= "<h1> $" . $total_shipping . "</h1>";[m
-[31m-                                $message .= "</td>";[m
-[31m-                                $message .= "</tr>";[m
-[31m-[m
-[31m-                                $minus_shipping = ($total_order_cost - $total_shipping);[m
-[31m-[m
-[31m-                                $message .= "<tr>";[m
-[31m-                                $message .= "<td>";[m
-[31m-                                $message .= "<h1>Minus Shipping:</h1>";[m
-[31m-                                $message .= "</td>";[m
-[31m-                                $message .= "<td>";[m
-[31m-                                $message .= "<h1> $" . $minus_shipping . "</h1>";[m
-[31m-                                $message .= "</td>";[m
-[31m-                                $message .= "</tr>";[m
-[31m-[m
-[31m-                                $percentage = number_format($minus_shipping * 0.10, 2, ".", ",");[m
-[31m-[m
-[31m-                                $message .= "<tr>";[m
-[31m-                                $message .= "<td>";[m
-[31m-                                $message .= "<h1>10%:</h1>";[m
-[31m-                                $message .= "</td>";[m
-[31m-                                $message .= "<td>";[m
-[31m-                                $message .= "<h1> $" . $percentage . "</h1>";[m
-[31m-                                $message .= "</td>";[m
-[31m-                                $message .= "</tr>";[m
-[31m-[m
-[31m-[m
-[31m-								$message .= "</tfoot>";[m
-[31m-								$message .= "</tbody>";[m
-[31m-								$message .= "</table>";[m
-[32m+[m[32m                    }[m[41m[m
-[32m+[m[32m                }[m[41m[m
-[32m+[m[41m[m
-[32m+[m[32m                $total_shipping = number_format($total_orders * 8.00, 2, '.', ',');[m[41m[m
-[32m+[m[41m[m
-[32m+[m[32m                $message .= "</tr>";[m[41m[m
-[32m+[m				[32m$message .= "<tfoot>";[m[41m[m
-[32m+[m[41m[m
-[32m+[m				[32m$message .= "<tr>";[m[41m[m
-[32m+[m				[32m$message .= "<td>";[m[41m[m
-[32m+[m[32m                $message .= "<h1>Total Orders: </h1>";[m[41m[m
-[32m+[m[32m                $message .= "</td>";[m[41m[m
-[32m+[m[32m                $message .= "<td>";[m[41m[m
-[32m+[m[32m                $message .= "<h1>$total_orders</h1>";[m[41m[m
-[32m+[m[32m                $message .= "</td>";[m[41m[m
-[32m+[m[32m                $message .= "</tr>";[m[41m[m
-[32m+[m[41m[m
-[32m+[m[32m                $message .= "<tr>";[m[41m[m
-[32m+[m[32m                $message .= "<td>";[m[41m[m
-[32m+[m[32m                $message .= "<h1>Total:</h1>";[m[41m[m
-[32m+[m[32m                $message .= "</td>";[m[41m[m
-[32m+[m[32m                $message .= "<td>";[m[41m[m
-[32m+[m[32m                $message .= "<h1>$" . $total_order_cost . "</h1>";[m[41m[m
-[32m+[m[32m                $message .= "</td>";[m[41m[m
-[32m+[m[32m                $message .= "</tr>";[m[41m[m
-[32m+[m[41m[m
-[32m+[m[32m                $message .= "<tr>";[m[41m[m
-[32m+[m[32m                $message .= "<td>";[m[41m[m
-[32m+[m[32m                $message .= "<h1>Total Shipping:</h1>";[m[41m[m
-[32m+[m[32m                $message .= "</td>";[m[41m[m
-[32m+[m[32m                $message .= "<td>";[m[41m[m
-[32m+[m[32m                $message .= "<h1> $" . $total_shipping . "</h1>";[m[41m[m
-[32m+[m[32m                $message .= "</td>";[m[41m[m
-[32m+[m[32m                $message .= "</tr>";[m[41m[m
-[32m+[m[41m[m
-[32m+[m[32m                $minus_shipping = ($total_order_cost - $total_shipping);[m[41m[m
-[32m+[m[41m[m
-[32m+[m[32m                $message .= "<tr>";[m[41m[m
-[32m+[m[32m                $message .= "<td>";[m[41m[m
-[32m+[m[32m                $message .= "<h1>Minus Shipping:</h1>";[m[41m[m
-[32m+[m[32m                $message .= "</td>";[m[41m[m
-[32m+[m[32m                $message .= "<td>";[m[41m[m
-[32m+[m[32m                $message .= "<h1> $" . $minus_shipping . "</h1>";[m[41m[m
-[32m+[m[32m                $message .= "</td>";[m[41m[m
-[32m+[m[32m                $message .= "</tr>";[m[41m[m
-[32m+[m[41m[m
-[32m+[m[32m                $percentage = number_format($minus_shipping * 0.10, 2, ".", ",");[m[41m[m
-[32m+[m[41m[m
-[32m+[m[32m                $message .= "<tr>";[m[41m[m
-[32m+[m[32m                $message .= "<td>";[m[41m[m
-[32m+[m[32m                $message .= "<h1>10%:</h1>";[m[41m[m
-[32m+[m[32m                $message .= "</td>";[m[41m[m
-[32m+[m[32m                $message .= "<td>";[m[41m[m
-[32m+[m[32m                $message .= "<h1> $" . $percentage . "</h1>";[m[41m[m
-[32m+[m[32m                $message .= "</td>";[m[41m[m
-[32m+[m[32m                $message .= "</tr>";[m[41m[m
-[32m+[m[41m[m
-[32m+[m[41m[m
-[32m+[m				[32m$message .= "</tfoot>";[m[41m[m
-[32m+[m				[32m$message .= "</tbody>";[m[41m[m
-[32m+[m				[32m$message .= "</table>";[m[41m[m
- [m
- [m
-[31m-                            }else {[m
-[31m-                                if ($affiliate) {[m
-[31m-                                   echo "No Orders for $affiliate";[m
-[31m-                                }else {[m
-[31m-                                   echo "No Affiliate Selected";[m
-[31m-                            }[m
-[31m-                            }[m
-[32m+[m[32m            }else {[m[41m[m
-[32m+[m[32m                if ($affiliate) {[m[41m[m
-[32m+[m[32m                   echo "No Orders for $affiliate";[m[41m[m
-[32m+[m[32m                }else {[m[41m[m
-[32m+[m[32m                   echo "No Affiliate Selected";[m[41m[m
-[32m+[m[32m            }[m[41m[m
-[32m+[m[32m            }[m[41m[m
- [m
- 			echo $message;[m
- [m
-[1mdiff --git a/js/ajax/dollars.php b/js/ajax/dollars.php[m
-[1mindex 40e8c8a..d3aeb3b 100644[m
-[1m--- a/js/ajax/dollars.php[m
-[1m+++ b/js/ajax/dollars.php[m
-[36m@@ -13,7 +13,7 @@[m [mdate_default_timezone_set('America/Los_Angeles');[m
- 	$dateFromSQL = $dateFromSQL . " 20:45:01";[m
- 	$dateToSQL = $dateTo . " 20:45:00";[m
- [m
-[31m-			$row = $in_state_total = $out_state_total = 0;[m
-[32m+[m			[32m$total_dollars = $row = $in_state_total = $out_state_total = $in_state_refunds = $out_state_refunds = $total_refunds = 0;[m[41m[m
- [m
- 			$message = '';[m
- [m
-[36m@@ -155,7 +155,7 @@[m [mdate_default_timezone_set('America/Los_Angeles');[m
- 		<?php if ($total_dollars) : ?>[m
- 			<div>[m
- 				<h1>Dollars</h1>[m
-[31m-				<table class="widefat fixed">[m
-[32m+[m				[32m<table class="widefat fixed exportable">[m[41m[m
- 					<thead>[m
- 						<tr>[m
- 							<th><b><?php echo count($total_sales_orders) . " Orders";?></b></th>[m
-[1mdiff --git a/js/ajax/merchandise.php b/js/ajax/merchandise.php[m
-[1mindex be0e2c6..d1ddf44 100644[m
-[1m--- a/js/ajax/merchandise.php[m
-[1m+++ b/js/ajax/merchandise.php[m
-[36m@@ -41,16 +41,16 @@[m
- [m
- 	        if ($orders && $orders) {[m
- 	            $message = $row = '';[m
-[31m-                $message .= "<table class='widefat fixed striped'>";[m
-[31m-                $message .= "<thead><tr><td>Product</td><td>Quantity</td></tr><tbody>";[m
-[32m+[m[32m                $message .= "<table class='widefat fixed striped exportable'>";[m[41m[m
-[32m+[m[32m                $message .= "<thead><tr><th>Product</th><th>Quantity</th></tr><tbody>";[m[41m[m
-                 foreach ($products as $product) {[m
-                     $message .= sprintf("<tr><td>%s</td><td>%s</td></tr>", $product->item, $product->qty);[m
-                 }[m
-                 $message .= "</tbody></table>";[m
-                 $message .= "<br /><hr /><br />";[m
- [m
-[31m-                $columns = array("Order #", "Date", "Customer", "State", "Total", "Tax", "Actions");[m
-[31m-                $message .= "<table class='widefat fixed striped'>";[m
-[32m+[m[32m                $columns = array("Order", "Date", "Customer", "State", "Total", "Tax", "Actions");[m[41m[m
-[32m+[m[32m                $message .= "<table id='table' class='widefat fixed striped'>";[m[41m[m
-                 $message .= "<thead>";[m
-                 $message .= "<tr>";[m
-                 foreach ($columns as $column) {[m
-[36m@@ -81,7 +81,7 @@[m
- 						$message .= "<tr id='row-$_order->id' valign=\"center\">";[m
- [m
- 						$message .= "<td>";[m
-[31m-						$message .= "<a href='" . get_option('siteurl') . "/wp-admin/post.php?action=edit&post=$_order->id' target='_blank'>#$_order->id</a>";[m
-[32m+[m						[32m$message .= "<a href='" . get_option('siteurl') . "/wp-admin/post.php?action=edit&post=$_order->id' target='_blank'>$_order->id</a>";[m[41m[m
- 						$message .= "</td>";[m
- [m
- 						$message .= "<td>";[m
-[36m@@ -97,12 +97,12 @@[m
- 						$message .= "</td>";[m
- [m
- 						$message .= "<td>";[m
-[31m-						$message .= array_sum($weight) . ' lbs';[m
-[32m+[m						[32m$total = ($_order->order_total != "0.00" && $_order->order_total != '') ? number_format($_order->order_total, 2, '.', ',') : '0.00';[m[41m[m
-[32m+[m						[32m$message .= "$". $total;[m[41m[m
- 						$message .= "</td>";[m
- [m
- 						$message .= "<td>";[m
-[31m-						$message .= "$" . number_format($_order->order_total, 2, '.', ',');[m
-[31m-						if ($_order->order_tax > 0) $message .= " + tax: $" . number_format($_order->order_tax, 2, '.', ',');[m
-[32m+[m						[32m$message .= ($_order->order_tax > 0) ? number_format($_order->order_tax, 2, '.', ',') : "";[m[41m[m
- 						$message .= "</td>";[m
- [m
- 						$message .= "<td class='action' id='$_order->id'>";[m
-[36m@@ -118,7 +118,6 @@[m
- 					$message .= "</tbody>";[m
- 					$message .= "</table>";[m
- [m
-[31m-                    print_r($results = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}subscriptions WHERE subscription_id < 20"));[m
- 					echo $message;[m
- 				}[m
- ?>[m
-[1mdiff --git a/js/ajax/orders.php b/js/ajax/orders.php[m
-[1mindex 7ad995a..1030f11 100644[m
-[1m--- a/js/ajax/orders.php[m
-[1m+++ b/js/ajax/orders.php[m
-[36m@@ -23,8 +23,8 @@[m
- [m
-         if ($orders) {[m
-             $message = $row = '';[m
-[31m-            $columns = array("Order #", "Date", "Customer", "State", "Total", "Tax", "Actions");[m
-[31m-                $message .= "<table class=\"widefat fixed striped\">";[m
-[32m+[m[32m            $columns = array("Order", "Date", "Customer", "State", "Total", "Tax", "Actions");[m[41m[m
-[32m+[m[32m                $message .= "<table class='widefat fixed striped exportable'>";[m[41m[m
-                 $message .= "<thead>";[m
-                 $message .= "<tr>";[m
-                 foreach ($columns as $column) {[m
-[36m@@ -42,7 +42,7 @@[m
-                     $subscription_type = get_post_meta($order_id, 'subscription_type', true);[m
-                     // For some unknown reason, the continue will stop wholesale orders. My best guess is that "continue" means, skip over this iteration, and start a new one[m
-                     if ($subscription_type == "Wholesale") continue;[m
-[31m-                    echo $order_id;[m
-[32m+[m[41m[m
- 					$_order = new WC_Order($order_id);[m
- [m
-                     if ( number_format($_order->order_total, 2, '.', ',') > 8.00) {[m
-[36m@@ -50,7 +50,7 @@[m
- [m
-                         $total_order_cost += $_order->order_total;[m
-                         $message .= "<tr><td>";[m
-[31m-                        $message .= "<a href='" . get_option('siteurl') . "/wp-admin/post.php?action=edit&post=$_order->id' target='_blank'>#$_order->id</a>";[m
-[32m+[m[32m                        $message .= "<a href='" . get_option('siteurl') . "/wp-admin/post.php?action=edit&post=$_order->id' target='_blank'>$_order->id</a>";[m[41m[m
-                         $message .= "</td>";[m
- [m
-                         $message .= "<td>";[m
-[1mdiff --git a/js/ajax/pounds.php b/js/ajax/pounds.php[m
-[1mindex 3e84be7..842e948 100644[m
-[1m--- a/js/ajax/pounds.php[m
-[1m+++ b/js/ajax/pounds.php[m
-[36m@@ -1,117 +1,117 @@[m
- <?php[m
- [m
- 	require( $_SERVER['DOCUMENT_ROOT'].'/wp-load.php' );[m
-[31m-	[m
-[32m+[m[41m[m
- 	global $wpdb;[m
-[31m-	[m
-[32m+[m[41m[m
- 	$dateFrom = date('Y-m-d', strtotime($_POST['dateFrom']));[m
- 	$dateTo = date('Y-m-d', strtotime($_POST['dateTo']));[m
-[31m-	[m
-[32m+[m[41m[m
-     $dateFromSQL = date("Y-m-d", strtotime($dateFrom) - 60 * 60 * 24);[m
-     $dateFromSQL = $dateFromSQL . " 20:45:01";[m
-     $dateToSQL = $dateTo . " 20:45:00";[m
-[31m-    [m
-[31m-	$total_pounds =  $wpdb->get_var("SELECT SUM(LEFT(meta.meta_value,1)) [m
-[32m+[m[41m[m
-[32m+[m	[32m$total_pounds =  $wpdb->get_var("SELECT SUM(LEFT(meta.meta_value,1))[m[41m[m
- 									FROM {$wpdb->posts} posts[m
-[31m-									LEFT JOIN {$wpdb->prefix}woocommerce_order_items items [m
-[32m+[m									[32mLEFT JOIN {$wpdb->prefix}woocommerce_order_items items[m[41m[m
- 										ON posts.ID = items.order_id[m
-[31m-									LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta meta [m
-[32m+[m									[32mLEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta meta[m[41m[m
- 										ON items.order_item_id = meta.order_item_id[m
- 									WHERE posts.post_date[m
-[31m-                                        BETWEEN '$dateFromSQL' [m
-[31m-                                            AND '$dateToSQL' [m
-[31m-									AND posts.post_status IN ('wc-completed', 'wc-refunded') [m
-[32m+[m[32m                                        BETWEEN '$dateFromSQL'[m[41m[m
-[32m+[m[32m                                            AND '$dateToSQL'[m[41m[m
-[32m+[m									[32mAND posts.post_status IN ('wc-completed', 'wc-refunded')[m[41m[m
- 									AND meta.meta_key = 'pa_pack'[m
- 								");[m
-[31m-						[m
-[31m-	$free_pounds =  $wpdb->get_var("SELECT COUNT(items.order_id) [m
-[32m+[m[41m[m
-[32m+[m	[32m$free_pounds =  $wpdb->get_var("SELECT COUNT(items.order_id)[m[41m[m
- 									FROM {$wpdb->posts} posts[m
- 									LEFT JOIN {$wpdb->prefix}woocommerce_order_items items ON posts.ID = items.order_id[m
- 									WHERE posts.post_date[m
-[31m-                                        BETWEEN '$dateFromSQL' [m
-[31m-                                            AND '$dateToSQL' [m
-[32m+[m[32m                                        BETWEEN '$dateFromSQL'[m[41m[m
-[32m+[m[32m                                            AND '$dateToSQL'[m[41m[m
- 									AND posts.post_status IN ('wc-completed', 'wc-refunded')[m
- 									AND items.order_item_name LIKE '%Free Pound%'[m
- 								");[m
-[31m-		[m
-[31m-		[m
-[31m-		$in_state_total_pounds = $wpdb->get_var("SELECT SUM(LEFT(itemmeta.meta_value,1)) [m
-[32m+[m[41m[m
-[32m+[m[41m[m
-[32m+[m		[32m$in_state_total_pounds = $wpdb->get_var("SELECT SUM(LEFT(itemmeta.meta_value,1))[m[41m[m
- 													FROM {$wpdb->posts} posts[m
-[31m-													LEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id [m
-[31m-													LEFT JOIN {$wpdb->prefix}woocommerce_order_items items [m
-[32m+[m													[32mLEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id[m[41m[m
-[32m+[m													[32mLEFT JOIN {$wpdb->prefix}woocommerce_order_items items[m[41m[m
- 														ON posts.ID = items.order_id[m
-[31m-													LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta [m
-[32m+[m													[32mLEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta[m[41m[m
- 														ON items.order_item_id = itemmeta.order_item_id[m
- 													WHERE posts.post_date[m
-[31m-                                                        BETWEEN '$dateFromSQL' [m
-[32m+[m[32m                                                        BETWEEN '$dateFromSQL'[m[41m[m
-                                                             AND '$dateToSQL'[m
- 													AND posts.post_status IN ('wc-completed', 'wc-refunded')[m
- 													AND ((meta.meta_key = '_shipping_state') AND (meta.meta_value = 'WA'))[m
- 													AND itemmeta.meta_key = 'pa_pack'"[m
- 								);[m
-[31m-		[m
-[31m-		$out_state_total_pounds = $wpdb->get_var("SELECT SUM(LEFT(itemmeta.meta_value,1)) [m
-[32m+[m[41m[m
-[32m+[m		[32m$out_state_total_pounds = $wpdb->get_var("SELECT SUM(LEFT(itemmeta.meta_value,1))[m[41m[m
- 													FROM {$wpdb->posts} posts[m
-[31m-													LEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id [m
-[31m-													LEFT JOIN {$wpdb->prefix}woocommerce_order_items items [m
-[32m+[m													[32mLEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id[m[41m[m
-[32m+[m													[32mLEFT JOIN {$wpdb->prefix}woocommerce_order_items items[m[41m[m
- 														ON posts.ID = items.order_id[m
-[31m-													LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta [m
-[32m+[m													[32mLEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta[m[41m[m
- 														ON items.order_item_id = itemmeta.order_item_id[m
- 													WHERE posts.post_date[m
-[31m-                                                        BETWEEN '$dateFromSQL' [m
-[32m+[m[32m                                                        BETWEEN '$dateFromSQL'[m[41m[m
-                                                             AND '$dateToSQL'[m
- 													AND posts.post_status IN ('wc-completed', 'wc-refunded')[m
- 													AND ((meta.meta_key = '_shipping_state') AND (meta.meta_value != 'WA'))[m
- 													AND itemmeta.meta_key = 'pa_pack'"[m
- 								);[m
-[31m-		[m
-[31m-        $in_state_free_pounds = $wpdb->get_var("SELECT COUNT(items.order_id) [m
-[32m+[m
-[32m+[m[32m        $in_state_free_pounds = $wpdb->get_var("SELECT COUNT(items.order_id)[m[41m[m
-                                                     FROM {$wpdb->posts} posts[m
-[31m-                                                    LEFT JOIN {$wpdb->postmeta} meta [m
-[32m+[m[32m                                                    LEFT JOIN {$wpdb->postmeta} meta[m[41m[m
-                                                         ON ((posts.ID = meta.post_id) AND (meta.meta_key = '_shipping_state'))[m
-[31m-                                                    LEFT JOIN {$wpdb->prefix}woocommerce_order_items items [m
-[32m+[m[32m                                                    LEFT JOIN {$wpdb->prefix}woocommerce_order_items items[m[41m[m
-                                                         ON posts.ID = items.order_id[m
-[31m-                                                    WHERE DATE(posts.post_date) [m
-[31m-                                                        BETWEEN '$dateFrom' [m
-[32m+[m[32m                                                    WHERE DATE(posts.post_date)[m[41m[m
-[32m+[m[32m                                                        BETWEEN '$dateFrom'[m[41m[m
-                                                             AND '$dateTo'[m
-[31m-                                                    AND meta.meta_value = 'WA' [m
-[32m+[m[32m                                                    AND meta.meta_value = 'WA'[m[41m[m
-                                                     AND posts.post_status IN ('wc-completed', 'wc-refunded')[m
-                                                     AND items.order_item_name LIKE '%Free Pound%'"[m
-                                 );[m
-[31m-                                    [m
-[31m-        $out_state_free_pounds = $wpdb->get_var("SELECT COUNT(items.order_id) [m
-[32m+[m[41m[m
-[32m+[m[32m        $out_state_free_pounds = $wpdb->get_var("SELECT COUNT(items.order_id)[m[41m[m
-                                                     FROM {$wpdb->posts} posts[m
-[31m-                                                    LEFT JOIN {$wpdb->postmeta} meta [m
-[32m+[m[32m                                                    LEFT JOIN {$wpdb->postmeta} meta[m[41m[m
-                                                         ON ((posts.ID = meta.post_id) AND (meta.meta_key = '_shipping_state'))[m
-[31m-                                                    LEFT JOIN {$wpdb->prefix}woocommerce_order_items items [m
-[32m+[m[32m                                                    LEFT JOIN {$wpdb->prefix}woocommerce_order_items items[m[41m[m
-                                                         ON posts.ID = items.order_id[m
-[31m-                                                    WHERE DATE(posts.post_date) [m
-[31m-                                                        BETWEEN '$dateFrom' [m
-[32m+[m[32m                                                    WHERE DATE(posts.post_date)[m[41m[m
-[32m+[m[32m                                                        BETWEEN '$dateFrom'[m[41m[m
-                                                             AND '$dateTo'[m
-[31m-                                                    AND meta.meta_value != 'WA' [m
-[32m+[m[32m                                                    AND meta.meta_value != 'WA'[m[41m[m
-                                                     AND posts.post_status IN ('wc-completed', 'wc-refunded')[m
-                                                     AND items.order_item_name LIKE '%Free Pound%'"[m
-                                 );[m
- [m
-[31m-		[m
-[32m+[m[41m[m
- 		$in_state_total_pounds = number_format($in_state_total_pounds, 2,'.', ',');[m
- 		$out_state_total_pounds = number_format($out_state_total_pounds, 2,'.', ',');[m
- 		$total_pounds = number_format($total_pounds, 2,'.', ',');[m
-[31m-		[m
-[32m+[m[41m[m
- 		$in_state_free_pounds = number_format($in_state_free_pounds, 2,'.', ',');[m
- 		$out_state_free_pounds = number_format($out_state_free_pounds, 2,'.', ',');[m
- 		$free_pounds = number_format($free_pounds, 2,'.', ',');[m
-[31m-		[m
-[32m+[m[41m[m
- 		$columns = array("In-State", "Out-of-State", "Total");[m
- 		$rows = array("Total Pounds" =>  array($in_state_total_pounds, $out_state_total_pounds, $total_pounds),[m
- 					  "Free Pounds" =>   array($in_state_free_pounds,  $out_state_free_pounds,  $free_pounds )[m
- 					  );[m
- 		?>[m
-[31m-		[m
-[32m+[m[41m[m
- 		<?php if ($total_pounds) : ?>[m
- 		<div>[m
- 			<h1>Pounds</h1>[m
-[31m-			<table class="widefat fixed">[m
-[32m+[m			[32m<table class="widefat fixed exportable">[m[41m[m
- 				<thead>[m
- 					<tr>[m
- 						<th></th>[m
-[36m@@ -128,9 +128,8 @@[m
- 						<td><?php echo $value ?></td>[m
- 						<?php endforeach; ?>[m
- 						</tr>[m
-[31m-					<?php endforeach; ?> [m
-[32m+[m					[32m<?php endforeach; ?>[m[41m[m
- 				</tbody>[m
- 			</table>[m
- 		</div>[m
- 	<?php endif; ?>[m
-[31m-		[m
-[1mdiff --git a/js/ajax/shipping.php b/js/ajax/shipping.php[m
-[1mindex 9027c77..cc95bee 100644[m
-[1m--- a/js/ajax/shipping.php[m
-[1m+++ b/js/ajax/shipping.php[m
-[36m@@ -1,78 +1,78 @@[m
- <?php[m
- [m
- 	require( $_SERVER['DOCUMENT_ROOT'].'/wp-load.php' );[m
-[31m-	[m
-[32m+[m[41m[m
- 	global $wpdb;[m
-[31m-	[m
-[32m+[m[41m[m
- 	$dateFrom = date('Y-m-d', strtotime($_POST['dateFrom']));[m
- 	$dateTo = date('Y-m-d', strtotime($_POST['dateTo']));[m
-[31m-	[m
-[32m+[m[41m[m
-     $dateFromSQL = date("Y-m-d", strtotime($dateFrom) - 60 * 60 * 24);[m
-     $dateFromSQL = $dateFromSQL . " 20:45:01";[m
-     $dateToSQL = $dateTo . " 20:45:00";[m
-[31m-    [m
-[31m-	$total_shipping = $wpdb->get_var("SELECT SUM(meta.meta_value) [m
-[32m+[m[41m[m
-[32m+[m	[32m$total_shipping = $wpdb->get_var("SELECT SUM(meta.meta_value)[m[41m[m
- 										FROM {$wpdb->posts} posts[m
-[31m-										LEFT JOIN {$wpdb->prefix}woocommerce_order_items items [m
-[32m+[m										[32mLEFT JOIN {$wpdb->prefix}woocommerce_order_items items[m[41m[m
- 											ON posts.ID = items.order_id[m
-[31m-										LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta meta [m
-[32m+[m										[32mLEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta meta[m[41m[m
- 											ON items.order_item_id = meta.order_item_id[m
- 										WHERE posts.post_date[m
-[31m-                                            BETWEEN '$dateFromSQL' [m
-[31m-                                                AND '$dateToSQL' [m
-[32m+[m[32m                                            BETWEEN '$dateFromSQL'[m[41m[m
-[32m+[m[32m                                                AND '$dateToSQL'[m[41m[m
- 										AND posts.post_status = 'wc-completed'[m
- 										AND items.order_item_type = 'shipping'[m
- 										AND meta.meta_key = 'cost'[m
- 										AND meta.meta_value > 0[m
- 						");[m
-[31m-						[m
-[31m-						[m
-[31m-	$in_state_shipping_costs = $wpdb->get_var("SELECT SUM(itemmeta.meta_value) [m
-[32m+[m[41m[m
-[32m+[m[41m[m
-[32m+[m	[32m$in_state_shipping_costs = $wpdb->get_var("SELECT SUM(itemmeta.meta_value)[m[41m[m
- 												FROM {$wpdb->posts} posts[m
-[31m-												LEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id [m
-[31m-												LEFT JOIN {$wpdb->prefix}woocommerce_order_items items [m
-[32m+[m												[32mLEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id[m[41m[m
-[32m+[m												[32mLEFT JOIN {$wpdb->prefix}woocommerce_order_items items[m[41m[m
- 													ON posts.ID = items.order_id[m
-[31m-												LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta [m
-[32m+[m												[32mLEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta[m[41m[m
- 													ON items.order_item_id = itemmeta.order_item_id[m
- 												WHERE posts.post_date[m
-[31m-                                                    BETWEEN '$dateFromSQL' [m
-[32m+[m[32m                                                    BETWEEN '$dateFromSQL'[m[41m[m
-                                                         AND '$dateToSQL'[m
- 												AND posts.post_status = 'wc-completed'[m
- 												AND ((meta.meta_key = '_shipping_state') AND (meta.meta_value = 'WA'))[m
- 												AND items.order_item_type = 'shipping'[m
-[31m-												AND itemmeta.meta_key = 'cost' [m
-[32m+[m												[32mAND itemmeta.meta_key = 'cost'[m[41m[m
- 												AND itemmeta.meta_value > 0[m
- 											");[m
-[31m-	$out_state_shipping_costs = $wpdb->get_var("SELECT SUM(itemmeta.meta_value) [m
-[32m+[m	[32m$out_state_shipping_costs = $wpdb->get_var("SELECT SUM(itemmeta.meta_value)[m[41m[m
- 												FROM {$wpdb->posts} posts[m
-[31m-												LEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id [m
-[31m-												LEFT JOIN {$wpdb->prefix}woocommerce_order_items items [m
-[32m+[m												[32mLEFT JOIN {$wpdb->postmeta} meta ON posts.ID = meta.post_id[m[41m[m
-[32m+[m												[32mLEFT JOIN {$wpdb->prefix}woocommerce_order_items items[m[41m[m
- 													ON posts.ID = items.order_id[m
-[31m-												LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta [m
-[32m+[m												[32mLEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta[m[41m[m
- 													ON items.order_item_id = itemmeta.order_item_id[m
- 												WHERE posts.post_date[m
-[31m-                                                    BETWEEN '$dateFromSQL' [m
-[32m+[m[32m                                                    BETWEEN '$dateFromSQL'[m[41m[m
-                                                         AND '$dateToSQL'[m
- 												AND posts.post_status = 'wc-completed'[m
- 												AND ((meta.meta_key = '_shipping_state') AND (meta.meta_value != 'WA'))[m
- 												AND items.order_item_type = 'shipping'[m
-[31m-												AND itemmeta.meta_key = 'cost' [m
-[32m+[m												[32mAND itemmeta.meta_key = 'cost'[m[41m[m
- 												AND itemmeta.meta_value > 0[m
- 											");[m
- [m
- 		$in_state_shipping_costs = number_format($in_state_shipping_costs, 2,'.', ',');[m
- 		$out_state_shipping_costs = number_format($out_state_shipping_costs, 2,'.', ',');[m
-[31m-		$total_shipping = number_format($total_shipping, 2,'.', ',');									[m
-[31m-											[m
-[31m-											[m
-[31m-		$columns = array("In-State", "Out-of-State", "Total"); [m
-[32m+[m		[32m$total_shipping = number_format($total_shipping, 2,'.', ',');[m[41m[m
-[32m+[m[41m[m
-[32m+[m[41m[m
-[32m+[m		[32m$columns = array("In-State", "Out-of-State", "Total");[m[41m[m
- 		$rows = array("Total Shipping" =>  array($in_state_shipping_costs, $out_state_shipping_costs, $total_shipping));[m
- 		?>[m
-[31m-		[m
-[32m+[m[41m[m
- 		<?php if ($total_shipping) : ?>[m
- 		<div>[m
- 			<h1>Shipping</h1>[m
-[31m-			<table class="widefat fixed">[m
-[32m+[m			[32m<table class="widefat fixed exportable">[m[41m[m
- 				<thead>[m
- 					<tr>[m
- 						<th></th>[m
-[36m@@ -89,8 +89,8 @@[m
- 						<td><?php echo $value ?></td>[m
- 						<?php endforeach; ?>[m
- 						</tr>[m
-[31m-					<?php endforeach; ?> [m
-[32m+[m					[32m<?php endforeach; ?>[m[41m[m
- 				</tbody>[m
- 			</table>[m
- 		</div>[m
-[31m-	<?php endif; ?>[m
-\ No newline at end of file[m
-[32m+[m	[32m<?php endif; ?>[m[41m[m
-[1mdiff --git a/js/ajax/wholesale.php b/js/ajax/wholesale.php[m
-[1mindex 076de47..bc63812 100644[m
-[1m--- a/js/ajax/wholesale.php[m
-[1m+++ b/js/ajax/wholesale.php[m
-[36m@@ -24,8 +24,8 @@[m
- 	        if ($orders) {[m
- 	            $message = $row = '';[m
- [m
-[31m-            	$columns = array("Order #", "Date", "Customer", "State", "Weight", "Total", "Actions");[m
-[31m-                $message .= "<table class=\"widefat fixed striped\">";[m
-[32m+[m[41m            [m	[32m$columns = array("Order", "Date", "Customer", "State", "Weight", "Total", "Actions");[m[41m[m
-[32m+[m[32m                $message .= "<table class='widefat fixed striped exportable'>";[m[41m[m
-                 $message .= "<thead>";[m
-                 $message .= "<tr>";[m
-                 foreach ($columns as $column) {[m
-[36m@@ -54,10 +54,10 @@[m
- [m
- 						$total_order_cost += $_order->order_total;[m
- [m
-[31m-						$message .= "<tr id='row-$_order->id' valign=\"center\">";[m
-[32m+[m						[32m$message .= "<tr id='row-{$_order->id}' valign='center'>";[m[41m[m
- [m
- 						$message .= "<td>";[m
-[31m-						$message .= "<a href='" . get_option('siteurl') . "/wp-admin/post.php?action=edit&post=$_order->id' target='_blank'>#$_order->id</a>";[m
-[32m+[m						[32m$message .= "<a href='" . get_option('siteurl') . "/wp-admin/post.php?action=edit&post=$_order->id' target='_blank'>$_order->id</a>";[m[41m[m
- 						$message .= "</td>";[m
- [m
- 						$message .= "<td>";[m
-[1mdiff --git a/woocommmerce-accounting.php b/woocommmerce-accounting.php[m
-[1mindex 25ce19d..394904b 100644[m
-[1m--- a/woocommmerce-accounting.php[m
-[1m+++ b/woocommmerce-accounting.php[m
-[36m@@ -9,7 +9,7 @@[m
- 	*/[m
- 	define( 'WOOCOMMERCE_ACCOUNTING_URL', __FILE__);[m
- 	define( 'WOOCOMMERCE_ACCOUNTING_PATH', untrailingslashit(plugin_dir_path(__FILE__)));[m
-[31m-	include WOOCOMMERCE_ACCOUNTING_PATH ."/classes/Export.class.php";[m
-[32m+[m[41m[m
- 	function woocommerce_accounting_css_and_js() {[m
- 		wp_register_style('woocommerce_accounting_css', plugins_url('css/admin.css',__FILE__ ));[m
- 		wp_enqueue_style('woocommerce_accounting_css');[m

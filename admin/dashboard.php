@@ -1,5 +1,5 @@
 <?php
-	     // If set, get date range from $_POST, if not create 1 month span
+     // If set, get date range from $_POST, if not create 1 month span
      if (!empty($_POST['dateFrom'])) {
 
        $dateFrom = $_POST['dateFrom'];
@@ -19,43 +19,43 @@
 
 	$affiliates = get_option('accounting_affiliates');
 
-    $reports = array('Dollars', 'Shipping', 'Pounds', 'Orders', 'Wholesale', 'Affiliates', 'Merchandise');
+    $reports = array('Dollars', 'Shipping', 'Pounds', 'Orders', 'Wholesale', 'Affiliates', 'Merchandise', 'Coffee');
 
 ?>
-		<hr />
-        <script src="<?php echo plugins_url("/woocommerce-accounting/js/jquery.json.min.js") ?>"></script>
-		<div>
-			<form id="date_form" action="" method="POST">
+<script src="<?php echo plugins_url("/woocommerce-accounting/js/jquery.json.min.js") ?>"></script>
+<hr />
+<div>
+	<form id="date_form" action="" method="POST">
 
-				From: <input type="text" id="dateFrom" class="date_picker" name="dateFrom" value="<?php echo $dateFrom ?>" size="9" />&nbsp;
-				To: <input type="text" id="dateTo" class="date_picker" name="dateTo" value="<?php echo $dateTo ?>" size="9" />&nbsp;&nbsp;&nbsp;
+		From: <input type="text" id="dateFrom" class="date_picker" name="dateFrom" value="<?php echo $dateFrom ?>" size="9" />&nbsp;
+		To: <input type="text" id="dateTo" class="date_picker" name="dateTo" value="<?php echo $dateTo ?>" size="9" />&nbsp;&nbsp;&nbsp;
 
-				<select id="select_report">
-                    <option value="">-- Select Report --</option>
-                    <?php foreach ( $reports as $report ) { ?>
-                        <option value="<?php echo strtolower($report) ?>"><?php echo $report ?></option>
-                    <?php } ?>
-				</select>
-				<select name="choose_affiliate" style="display:none;" id="choose_affiliate">
-					<option value="">-- Choose Affiliate --</option>
-					<?php foreach ($affiliates as $key => $affiliate ) : ?>
-						<option value="<?php echo $affiliate; ?>"><?php echo $affiliate; ?></option>
-						<?php endforeach; ?>
-				</select>
-                <input style="display:none;" type="text" name="add_item_search" id="add_item_search" size="15" class="add-item-search" placeholder="Search Products . . . " />
-				<span id="submit_report" class="button-primary">Submit</span>
-					<span style="float:right;margin-right:15%;" id="print_report" class="button-primary">Print</span>
-                    <span style="float:right;margin-right:1%;" id="export_report" class="button-primary">Export</span>
-			</form>
-		</div>
-		<br />
-		<hr />
-        <div id="report"></div>
+		<select id="select_report">
+            <option value="">-- Select Report --</option>
+            <?php foreach ( $reports as $report ) { ?>
+                <option value="<?php echo strtolower($report) ?>"><?php echo $report ?></option>
+            <?php } ?>
+		</select>
+		<select name="choose_affiliate" style="display:none;" id="choose_affiliate">
+			<option value="">-- Choose Affiliate --</option>
+			<?php foreach ($affiliates as $key => $affiliate ) : ?>
+				<option value="<?php echo $affiliate; ?>"><?php echo $affiliate; ?></option>
+				<?php endforeach; ?>
+		</select>
+        <input style="display:none;" type="text" name="add_item_search" id="add_item_search" size="15" class="add-item-search" placeholder="Search Products . . . " />
+		<span id="submit_report" class="button-primary">Submit</span>
+		<span style="float:right;margin-right:15%;" id="print_report" class="button-primary">Print</span>
+        <span style="float:right;margin-right:1%;" id="export_report" class="button-primary">Export</span>
+	</form>
+</div>
+<br />
+<hr />
+<div id="report"></div>
 
-        <form id="export_form" action="<?php echo plugins_url("/woocommerce-accounting/js/ajax/export.php") ?>" method="POST">
-            <input type="hidden" name="table_data" value="" />
-            <input type="hidden" name="report" value="wholesale" />
-        </form>
+<form id="export_form" action="<?php echo plugins_url("/woocommerce-accounting/js/ajax/export.php") ?>" method="POST">
+    <input type="hidden" name="table_data" value="" />
+    <input type="hidden" name="report" value="wholesale" />
+</form>
 
 <script type="text/javascript">
 	jQuery(document).ready(function($) {
@@ -72,6 +72,9 @@
     				$('#add_item_search').show();
     			}
 			});
+            $('#add_item_search').on('change', function(){
+
+            });
 
 		    $('#submit_report').on("click", function() {
 		    $(this).text("Loading . . . ").attr("disabled", true);
@@ -96,7 +99,7 @@
 			var print_report = window.open('', 'Accounting', 'height=800,width=1000');
 			var print_content = document.getElementById('report').innerHTML;
 
-	        print_report.document.write('<html><head><style>table{border:3px solid black;}tr{border:1px solid black;}</style>');
+	        print_report.document.write('<html><head><style>table{border:3px solid black;}tr{border:1px solid black;}tr{width:100%;}.action{display:none;}th:last-of-type{display:none;}</style>');
 	        print_report.document.write('<title>'+report+' - '+date[0]+' - '+date[1]+'</title>');
 	        print_report.document.write('<h2>'+date[0]+' - '+date[1]+'</h2>')
 	        print_report.document.write('</head><body>');
@@ -149,7 +152,7 @@
                     table_data[row][i] = ($(tr).find(cell+':eq('+i+')').text()).trim();
                 }
             });
-            // 1IMPORTANT Convert to JSON (required jQuery plugin)
+            // IMPORTANT! Convert to JSON (required jQuery plugin)
             table_data = $.toJSON(table_data);
             $('#export_form input[name="table_data"]').val(table_data);
             $('#export_form input[name="report"]').val(report);

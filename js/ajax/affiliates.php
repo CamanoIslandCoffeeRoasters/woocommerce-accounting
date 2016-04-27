@@ -45,21 +45,21 @@
                 foreach ($affiliate_orders as $key => $order) {
                     $_order = new WC_Order($order);
 
-                    if ( number_format($_order->order_total, 2, '.', ',') > 8.00) {
+                    if ( (float) number_format($_order->order_total, 2, '.', ',') > 8.00) {
                         $total_orders++;
 
-                        $total_order_cost += $_order->order_total;
+                        $total_order_cost += (float) $_order->order_total;
 
                         $message .= "<tr><td>";
                         $message .= "<a href='" . get_option('siteurl') . "/wp-admin/post.php?action=edit&post=$_order->id' target='_blank'>$_order->id</a>";
                         $message .= "</td>";
 
                         $message .= "<td>";
-                        $message .= "<p>" . $_order->order_date . "</p>";
+                        $message .= "" . date("m/d/Y", strtotime($_order->order_date)) . "";
                         $message .= "</td>";
 
                         $message .= "<td>";
-                        $message .= "<p>" . $_order->billing_first_name . " " . $_order->billing_last_name . "</p>";
+                        $message .= "<p>" . ucwords($_order->billing_first_name . " " . $_order->billing_last_name) . "</p>";
                         $message .= "</td>";
 
                         $message .= "<td>";
@@ -71,19 +71,15 @@
                         $message .= "</td>";
 
                         $message .= "<td>";
-						if ($_order->order_tax > 0) $message .= "$" . number_format($_order->order_tax, 2, '.', ',');
+						if ($_order->order_tax > 0) {
+                            $total_item_tax += (float) number_format($_order->order_tax, 2);
+                            $message .= "$" . number_format($_order->order_tax, 2, '.', ',');
+                        }
 						$message .= "</td>";
 
                         $message .= "<td class='action' id='$_order->id'>";
 						$message .= "<button class='actions button-primary'>Items</button>";
 						$message .= "</td>";
-
-                        $orderContent = $_order->get_items($type = 'line_item');
-                        foreach ($orderContent as $k => $v ) {
-                            if ($v['line_tax'] > 0) {
-                                $total_item_tax += number_format(round($v['line_tax'], 2, PHP_ROUND_HALF_UP), 2,'.', ',');
-                            }
-                        }
 
                     }
                 }
@@ -91,71 +87,40 @@
                 $total_shipping = number_format($total_orders * 8.00, 2, '.', ',');
 
                 $message .= "</tr>";
-				$message .= "<tfoot>";
-
-				$message .= "<tr>";
-				$message .= "<td>";
-                $message .= "<h1>Total Orders: </h1>";
-                $message .= "</td>";
-                $message .= "<td>";
-                $message .= "<h1>$total_orders</h1>";
-                $message .= "</td>";
-                $message .= "</tr>";
-
-                $message .= "<tr>";
-                $message .= "<td>";
-                $message .= "<h1>Total:</h1>";
-                $message .= "</td>";
-                $message .= "<td>";
-                $message .= "<h1>$" . $total_order_cost . "</h1>";
-                $message .= "</td>";
-                $message .= "</tr>";
-
-                $message .= "<tr>";
-                $message .= "<td>";
-                $message .= "<h1>Total Shipping:</h1>";
-                $message .= "</td>";
-                $message .= "<td>";
-                $message .= "<h1> $" . $total_shipping . "</h1>";
-                $message .= "</td>";
-                $message .= "</tr>";
-
-                $minus_shipping = ($total_order_cost - $total_shipping);
-
-                $message .= "<tr>";
-                $message .= "<td>";
-                $message .= "<h1>Minus Shipping:</h1>";
-                $message .= "</td>";
-                $message .= "<td>";
-                $message .= "<h1> $" . $minus_shipping . "</h1>";
-                $message .= "</td>";
-                $message .= "</tr>";
-
-                $percentage = number_format($minus_shipping * 0.10, 2, ".", ",");
-
-                $message .= "<tr>";
-                $message .= "<td>";
-                $message .= "<h1>10%:</h1>";
-                $message .= "</td>";
-                $message .= "<td>";
-                $message .= "<h1> $" . $percentage . "</h1>";
-                $message .= "</td>";
-                $message .= "</tr>";
-
-
-				$message .= "</tfoot>";
 				$message .= "</tbody>";
 				$message .= "</table>";
 
+                $totals['Orders']   = $total_orders;
+                $totals['Subtotal'] = $total_order_cost;
+                $totals['Shipping'] = $total_orders * 8;
+                $totals['Tax']      = $total_item_tax;
+                $totals['Total']    = $totals['Subtotal'] - $totals['Shipping'];
+                $totals['Percentage'] = $totals['Total'] * 0.1;
 
+                $totals = array_map(function($number) { return number_format($number,2); }, $totals);
+
+                $totals_table = '';
+                $totals_table = "<table class='widefat fixed striped'>";
+                $totals_table .= "<thead><tr>";
+                foreach (array_keys($totals) as $key) {
+                    $totals_table .= "<th><b>$key</b></th>";
+                }
+                $totals_table .= "</tr></thead>";
+                $totals_table .= "<tbody><tr>";
+                foreach (array_values($totals) as $key) {
+                    $totals_table .= "<th>$key</th>";
+                }
+                $totals_table .= "</tr></tbody>";
+                $totals_table .= "</table><br />";
+
+
+                echo $totals_table . $message;
             }else {
                 if ($affiliate) {
                    echo "No Orders for $affiliate";
                 }else {
                    echo "No Affiliate Selected";
+                }
             }
-            }
-
-			echo $message;
 
 ?>

@@ -85,24 +85,24 @@
 						$message .= "</td>";
 
 						$message .= "<td>";
-						$message .= "" . date("m/d/Y", strtotime($_order->order_date)) . "";
+						$message .= date("m/d/Y", strtotime($_order->order_date)) . "";
 						$message .= "</td>";
 
 						$message .= "<td>";
-						$message .= "" . $_order->billing_first_name . " " . $_order->billing_last_name . "";
+						$message .= $_order->billing_first_name . " " . $_order->billing_last_name . "";
 						$message .= "</td>";
 
 						$message .= "<td>";
-						$message .= "" . strtoupper($_order->shipping_state) . "";
+						$message .= strtoupper($_order->shipping_state) . "";
 						$message .= "</td>";
 
 						$message .= "<td>";
-						$total = ($_order->order_total != "0.00" && $_order->order_total != '') ? number_format($_order->order_total, 2, '.', ',') : '0.00';
-						$message .= "$". $total;
+						$total = wc_price(($_order->order_total != "0.00" && $_order->order_total != '') ? number_format($_order->order_total, 2, '.', ',') : '');
+						$message .= $total;
 						$message .= "</td>";
 
 						$message .= "<td>";
-						$message .= ($_order->order_tax > 0) ? number_format($_order->order_tax, 2, '.', ',') : "";
+						$message .= wc_price(($_order->order_tax > 0) ? number_format($_order->order_tax, 2, '.', ',') : "");
 						$message .= "</td>";
 
 						$message .= "<td class='action' id='$_order->id'>";

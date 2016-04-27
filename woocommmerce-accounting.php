@@ -10,16 +10,6 @@
 	define( 'WOOCOMMERCE_ACCOUNTING_URL', __FILE__);
 	define( 'WOOCOMMERCE_ACCOUNTING_PATH', untrailingslashit(plugin_dir_path(__FILE__)));
 
-	function woocommerce_accounting_css_and_js() {
-		// wp_register_style('woocommerce_accounting_css', plugins_url('css/admin.css',__FILE__ ));
-		// wp_enqueue_style('woocommerce_accounting_css');
-		// wp_register_script('woocommerce_accounting_js', plugins_url('js/admin.js',__FILE__ ));
-		// wp_enqueue_script('woocommerce_accounting_js');
-	}
-
-	// add_action( 'wp_enqueue_scripts','woocommerce_accounting_css_and_js');
-
-
 	// Call register settings function
 	add_action( 'admin_init', 'register_woo_accounting_settings' );
 

@@ -19,10 +19,11 @@
                                             AND DATE(posts.post_date)
                                                 BETWEEN '$dateFromSQL'
                                                     AND '$dateToSQL'
-                                            AND meta.meta_value = 'Wholesale'", 0);
+                                            AND meta.meta_value = 'Wholesale'
+											ORDER BY posts.post_date ASC", 0);
 
 	        if ($orders) {
-	            $message = $row = '';
+	            $message = '';
 
             	$columns = array("Order", "Date", "Customer", "State", "Weight", "Total", "Actions");
                 $message .= "<table class='widefat fixed striped exportable'>";
@@ -40,19 +41,20 @@
 
 					foreach ($orders as $order_id) {
 						$_order = new WC_Order($order_id);
-						$weight = $wpdb->get_col("SELECT (m2.meta_value * (REPLACE(REPLACE(m1.meta_value, '12oz', '0.75'), 'lb', ''))) as weight
-													FROM {$wpdb->prefix}woocommerce_order_itemmeta m1
-													JOIN {$wpdb->prefix}woocommerce_order_itemmeta m2
-														ON ((m2.order_item_id = m1.order_item_id)
-														AND (m2.meta_key = '_qty'))
-													WHERE m1.order_item_id
-														IN (SELECT order_item_id
-													        FROM {$wpdb->prefix}woocommerce_order_items
-													        WHERE order_id = '$order_id')
-													AND m1.meta_key = 'pa_pack'");
-	                    $total_orders++;
+						$total_orders++;
 
-						$total_order_cost += $_order->order_total;
+						$weight = $wpdb->get_col("SELECT sum(m2.meta_value * (REPLACE(REPLACE(m1.meta_value, '12oz', '0.75'), 'lb', ''))) as weight
+													FROM {$wpdb->prefix}woocommerce_order_items items
+													JOIN {$wpdb->prefix}woocommerce_order_itemmeta m1
+														ON ((items.order_item_id = m1.order_item_id)
+														AND (m1.meta_key = 'pa_pack'))
+													JOIN {$wpdb->prefix}woocommerce_order_itemmeta m2
+														ON ((items.order_item_id = m2.order_item_id)
+														AND (m2.meta_key = '_qty'))
+													WHERE items.order_id = '$order_id'");
+
+
+						$total_order_cost += (float) $_order->order_total;
 
 						$message .= "<tr id='row-{$_order->id}' valign='center'>";
 
@@ -65,7 +67,7 @@
 						$message .= "</td>";
 
 						$message .= "<td>";
-						$message .= "" . $_order->billing_first_name . " " . $_order->billing_last_name . "";
+						$message .= "<span title='". $_order->billing_company ."'>" . $_order->billing_first_name . " " . $_order->billing_last_name . "</span>";
 						$message .= "</td>";
 
 						$message .= "<td>";
@@ -78,22 +80,46 @@
 
 						$message .= "<td>";
 						$message .= "$" . number_format($_order->order_total, 2, '.', ',');
-						if ($_order->order_tax > 0) $message .= " + tax: $" . number_format($_order->order_tax, 2, '.', ',');
+						if ($_order->order_tax > 0) {
+							$total_item_tax += (float) number_format($_order->order_tax, 2);
+							$message .= " + tax: $" . number_format($_order->order_tax, 2);
+						}
 						$message .= "</td>";
 
 						$message .= "<td class='action' id='$_order->id'>";
 						$message .= "<button class='actions button-primary'>Items</button>";
 						$message .= "</td>";
 
-	                    $row+=1;
 	                }
-
-	                $total_shipping = number_format($total_orders * 8.00, 2, '.', ',');
 
 	                $message .= "</tr>";
 					$message .= "</tbody>";
 					$message .= "</table>";
 
-					echo $message;
-				}
+					$totals['Orders']   = $total_orders;
+	                $totals['Subtotal'] = $total_order_cost;
+	                // $totals['Shipping'] = $total_orders * 8;
+	                $totals['Tax'] 		= $total_item_tax;
+	                $totals['Total']    = $totals['Subtotal'] - $totals['Shipping'];
+
+	                $totals = array_map(function($number) { return number_format($number,2); }, $totals);
+
+	                $totals_table = '';
+	                $totals_table = "<table class='widefat fixed striped'>";
+	                $totals_table .= "<thead><tr>";
+	                foreach (array_keys($totals) as $key) {
+	                    $totals_table .= "<th><b>$key</b></th>";
+	                }
+	                $totals_table .= "</tr></thead>";
+	                $totals_table .= "<tbody><tr>";
+	                foreach (array_values($totals) as $key) {
+	                    $totals_table .= "<th>$key</th>";
+	                }
+	                $totals_table .= "</tr></tbody>";
+	                $totals_table .= "</table><br />";
+
+				}else {
+	                echo "No Orders for selected date range";
+	            }
+			echo $totals_table . $message;
 ?>

@@ -19,11 +19,11 @@
                                     BETWEEN '$dateFromSQL'
                                         AND '$dateToSQL'
                                 ", 0);
-                                // print_r($orders);
 
         if ($orders) {
-            $message = $row = '';
+            $message = '';
             $columns = array("Order", "Date", "Customer", "State", "Total", "Tax", "Actions");
+            $message .= "<h1>Orders</h1>";
                 $message .= "<table class='widefat fixed striped exportable'>";
                 $message .= "<thead>";
                 $message .= "<tr>";
@@ -35,7 +35,7 @@
                 $message .= "<tbody>";
 
 
-				$total_item_tax = $total_order_cost = $total_orders = $row = 0;
+				$total_item_tax = $total_order_cost = $total_orders = 0;
 
 				foreach ($orders as $order_id) {
                     $subscription_type = '';
@@ -45,10 +45,10 @@
 
 					$_order = new WC_Order($order_id);
 
-                    if ( number_format($_order->order_total, 2, '.', ',') > 8.00) {
+                    if ( number_format((float) $_order->order_total, 2, '.', ',') > 8.00) {
                         $total_orders++;
+                        $total_order_cost += (float) $_order->order_total;
 
-                        $total_order_cost += $_order->order_total;
                         $message .= "<tr><td>";
                         $message .= "<a href='" . get_option('siteurl') . "/wp-admin/post.php?action=edit&post=$_order->id' target='_blank'>$_order->id</a>";
                         $message .= "</td>";
@@ -58,7 +58,7 @@
                         $message .= "</td>";
 
                         $message .= "<td>";
-                        $message .= "<p>" . $_order->billing_first_name . " " . $_order->billing_last_name . "</p>";
+                        $message .= "<p>" . ucwords($_order->billing_first_name . " " . $_order->billing_last_name) . "</p>";
                         $message .= "</td>";
 
                         $message .= "<td>";
@@ -66,80 +66,52 @@
                         $message .= "</td>";
 
                         $message .= "<td>";
-                        $message .= "<p>$" . number_format($_order->order_total, 2, '.', ',') . "</p>";
+                        $message .= "<p>$" . (float) number_format($_order->order_total, 2, '.', ',') . "</p>";
                         $message .= "</td>";
 
                         $message .= "<td>";
-                        $message .= "<p>$" . number_format($_order->order_tax, 2, '.', ',') . "</p>";
+                        if ((float) $_order->order_tax > 0) {
+                            $message .= wc_price(( (float) $_order->order_tax > 0) ? number_format($_order->order_tax, 2, '.', ',') : "");
+                            $total_item_tax += (float) number_format($_order->order_tax, 2);
+                        }
                         $message .= "</td>";
 
 						$message .= "<td class='action' id='$_order->id'>";
 						$message .= "<button class='actions button-primary'>Items</button>";
 						$message .= "</td>";
 
-                        $order_items = $_order->get_items($type = 'line_item');
-                        foreach ($order_items as $k => $v ) {
-                            if ($v['line_tax'] > 0) {
-                                $total_item_tax += number_format(round($v['line_tax'], 2, PHP_ROUND_HALF_UP), 2,'.', ',');
-                            }
-                        }
-
-                    $row+=1;
-
 					}
                 }
 
-                $total_shipping = number_format($total_orders * 8.00, 2, '.', ',');
-
                 $message .= "</tr>";
-				$message .= "<tfoot>";
+                $message .= "</tbody>";
+                $message .= "</table>";
 
-				$message .= "<tr>";
-				$message .= "<td>";
-                $message .= "<h1>Total Orders: </h1>";
-                $message .= "</td>";
-                $message .= "<td>";
-                $message .= "<h1>$total_orders</h1>";
-                $message .= "<td>";
-                $message .= "</tr>";
+                $totals['Orders']   = $total_orders;
+                $totals['Subtotal'] = $total_order_cost;
+                $totals['Shipping'] = $total_orders * 8;
+                $totals['Tax']      = $total_item_tax;
+                $totals['Total']    = $totals['Subtotal'] - $totals['Shipping'];
 
-                $message .= "<tr>";
-                $message .= "<td>";
-                $message .= "<h1>Total:</h1>";
-                $message .= "</td>";
-                $message .= "<td>";
-                $message .= "<h1>$" . $total_order_cost . "</h1>";
-                $message .= "</td>";
-                $message .= "</tr>";
+                $totals = array_map(function($number) { return number_format($number,2); }, $totals);
 
-                $message .= "<tr>";
-                $message .= "<td>";
-                $message .= "<h1>Total Shipping:</h1>";
-                $message .= "</td>";
-                $message .= "<td>";
-                $message .= "<h1> $" . $total_shipping . "</h1>";
-                $message .= "</td>";
-                $message .= "</tr>";
-
-                $minus_shipping = ($total_order_cost - $total_shipping);
-
-                $message .= "<tr>";
-                $message .= "<td>";
-                $message .= "<h1>Minus Shipping:</h1>";
-                $message .= "</td>";
-                $message .= "<td>";
-                $message .= "<h1> $" . $minus_shipping . "</h1>";
-                $message .= "</td>";
-                $message .= "</tr>";
-
-				$message .= "</tfoot>";
-				$message .= "</tbody>";
-				$message .= "</table>";
-
+                $totals_table = '';
+                $totals_table = "<table class='widefat fixed striped'>";
+                $totals_table .= "<thead><tr>";
+                foreach (array_keys($totals) as $key) {
+                    $totals_table .= "<th><b>$key</b></th>";
+                }
+                $totals_table .= "</tr></thead>";
+                $totals_table .= "<tbody><tr>";
+                foreach (array_values($totals) as $key) {
+                    $totals_table .= "<th>$key</th>";
+                }
+                $totals_table .= "</tr></tbody>";
+                $totals_table .= "</table><br />";
 
             }else {
                 echo "No Orders for selected date range";
             }
 
-            echo $message;
+            echo $totals_table . $message;
 ?>

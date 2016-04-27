@@ -3,7 +3,6 @@
 
     global $woocommerce;
 
-    // echo $_POST['order_id'];
     $order_id = $_POST['order_id'];
     $_order = new WC_Order($order_id);
     $items = $_order->get_items('line_item');
@@ -63,8 +62,7 @@
                         </tr>
                     </tfoot>
                 </table>
-                </div>
             </div>
-        </td>
-
-    </tr>
+        </div>
+    </td>
+</tr>
